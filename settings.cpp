@@ -40,7 +40,7 @@ void Settings::closeEvent(QCloseEvent *event){
         else if (!nb->save){
             event->accept();
         }
-        delete nb;
+        //delete nb;
     }
 }
 
