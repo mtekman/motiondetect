@@ -60,6 +60,6 @@ void convertToMP4(QString &dir, bool clear, QString videoname="movement")
 bool lensClosed() {
     FILE * ff = fopen("/sys/devices/platform/gpio-switch/cam_shutter/state", "r");
     char state = fgetc(ff);   // file contains either "open" or "closed"
-    fclose(file);
+    fclose(ff);
     return state == 'c';
 }
