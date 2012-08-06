@@ -2,7 +2,6 @@
 #define OPERATIONS_H
 
 #include <QThread>
-#include <QMainWindow>
 #include <FCam/Frame.h>
 #include <FCam/N900.h>
 
@@ -33,7 +32,7 @@ public:
     //Time is in microseconds *10^-6
     Operations(int w=320, int h=240, int exp=1000000, float gain=1.0f,
                bool histogram=true);
-    void finishAndClose();
+    void finishAndClose(bool quickly=false);
     //No destructor
 
 protected:

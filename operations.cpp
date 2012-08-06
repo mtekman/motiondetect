@@ -11,9 +11,9 @@
 #include <FCam/N900.h>
 #include <FCam/Image.h>
 #include <QPicture>
+#include <QLabel>
 #include "CImg.h"
 #include "functions.cpp"
-#include "mainwindow.h"
 
 using namespace cimg_library;
 
@@ -39,6 +39,7 @@ QString save_dir;
 
 
 void Operations::run(){
+    qDebug() << "Starting";
     save_dir = image_dir;
 
     qDebug() << "Started";
@@ -51,7 +52,7 @@ void Operations::run(){
 }
 
 
-Operations::Operations(int w, int h, int exp, float gain, bool histogram){
+Operations::Operations(int w, int h, int exp, float gain, bool histogram){   
     width = w; height = h; //update static class vars
     // Check compatiblity
     errorCheck();
@@ -64,9 +65,11 @@ Operations::Operations(int w, int h, int exp, float gain, bool histogram){
     stream1.histogram.enabled = histogram;
     stream1.histogram.region = FCam::Rect(0, 0, width, height);
 
+    if(lensClosed()) //Do something.
+
 }
 
-void Operations::finishAndClose(){
+void Operations::finishAndClose(bool quickly){
     // Order the sensor to stop the pipeline and discard any frames still in it.
     sensor1.stop();
     qDebug() << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
@@ -75,9 +78,12 @@ void Operations::finishAndClose(){
     assert(sensor1.framesPending() == 0);
     assert(sensor1.shotsPending() == 0);
 
+    //Emergency exit -- not very safe method for quitting thread.
+    if(quickly) this->quit();
+
     //Convert images to movie, bool = delete images
     if(convert_images) convertToMP4(save_dir,delete_images);
-    this->exit();
+
 }
 
 
