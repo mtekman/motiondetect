@@ -17,17 +17,12 @@
 
 using namespace cimg_library;
 
-namespace Plat = FCam::N900;
+//namespace Plat = FCam::N900;
 
 //
 int norm = 100; //custom normalisation amount
 QString current_save_image; //filename of last movement image -- shared for emailing
 
-
-//Camera Variables
-Plat::Sensor sensor1;      //Image Sensor
-FCam::Shot stream1;              //Shot
-FCam::Frame frame1;              //Frame
 
 CImg<unsigned char> average; //Last average
 QLabel *imglabel;
@@ -53,6 +48,7 @@ void Operations::run(){
 
 
 Operations::Operations(int w, int h, int exp, float gain, bool histogram){   
+    willStop = false;
     width = w; height = h; //update static class vars
     // Check compatiblity
     errorCheck();
@@ -65,11 +61,11 @@ Operations::Operations(int w, int h, int exp, float gain, bool histogram){
     stream1.histogram.enabled = histogram;
     stream1.histogram.region = FCam::Rect(0, 0, width, height);
 
-    if(lensClosed()) //Do something.
+    if(lensClosed()) {}//Do something.
 
 }
 
-void Operations::finishAndClose(bool quickly){
+void Operations::finishAndClose(){
     // Order the sensor to stop the pipeline and discard any frames still in it.
     sensor1.stop();
     qDebug() << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
@@ -78,11 +74,12 @@ void Operations::finishAndClose(bool quickly){
     assert(sensor1.framesPending() == 0);
     assert(sensor1.shotsPending() == 0);
 
-    //Emergency exit -- not very safe method for quitting thread.
-    if(quickly) this->quit();
-
-    //Convert images to movie, bool = delete images
-    if(convert_images) convertToMP4(save_dir,delete_images);
+    //If stop signal given, thread terminates here.
+    if(!willStop)
+    {
+        //Convert images to movie, bool = delete images
+        if(convert_images) convertToMP4(save_dir,delete_images);
+    }
 
 }
 
@@ -229,7 +226,7 @@ void Operations::checkMovement(int interval, int limit)
             current_interval = interval;      //Back to normal tick speed
             qDebug() << "Current interval:" << current_interval;
         }
-    }while(count-- > 0);
+    }while(count-- > 0 && !willStop);
 }
 
 void Operations::record(int frame_num, int interval)
@@ -255,5 +252,5 @@ void Operations::record(int frame_num, int interval)
 
         image_count++;
     }
-    while (count ++<frame_num);
+    while (count ++<frame_num && !willStop);
 }

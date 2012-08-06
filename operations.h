@@ -32,13 +32,25 @@ public:
     //Time is in microseconds *10^-6
     Operations(int w=320, int h=240, int exp=1000000, float gain=1.0f,
                bool histogram=true);
-    void finishAndClose(bool quickly=false);
+    void finishAndClose();
     //No destructor
+
+public slots:
+    void stop(){
+        willStop = true;
+        sensor1.stopStreaming();
+    }
 
 protected:
     void run();
 
 private:
+    bool willStop; //bool for stopping safely
+    //Camera Variables
+    FCam::N900::Sensor sensor1;      //Image Sensor
+    FCam::Shot stream1;              //Shot
+    FCam::Frame frame1;              //Frame
+
     void errorCheck();
     void getStaticBGImage(int stableframenum = 10); //50ms
     //For Debugging:
