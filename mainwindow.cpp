@@ -19,9 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     //Share ImageLabel -- so that Operations can access it.
     img = ui->imageLab;
 
-    //op = new Operations;
-
-    //Load defaults
+   //Load Settings --- doesnt work
     if(!QSettings("Motion","Detect").contains("image_dir") )
     {
         readLastWorkingSettings(false);
@@ -95,6 +93,8 @@ void MainWindow::on_pushButton_clicked()
 
     op = new Operations(width, height);
 
+    //connect(ui->pushButton_stop, SIGNAL(clicked()), op, SLOT(stop()));
+
     op->limitVal = limitVal;
     op->interval_default = interval_default;
 
@@ -107,9 +107,6 @@ void MainWindow::on_pushButton_clicked()
     op->convert_images = convert_images;
     op->delete_images = delete_images;
 
-    //op->width = width;
-    //op->height = height;
-
     op->image_dir = image_dir;
 
     op->frameNum = ui->frameAv->value();
@@ -120,15 +117,12 @@ void MainWindow::on_pushButton_clicked()
              << " convert:" << op->convert_images << " delete:" << op->delete_images << " width,height" << op->width << op->height
              << "image dir:" << op->image_dir;
 
+    show_widgets(false);
+
     qDebug() << "YOU";
     op->start();
     qDebug() << "NRW";
 
-    //Disable widgets
-    ui->mask_slide->setDisabled(true); ui->maskEdit->setDisabled(true);
-    ui->dial->setDisabled(true); ui->frameAv->setDisabled(true);
-    //Hide button
-    ui->pushButton->hide(); ui->pushButton_stop->show(); ui->pushButton_settings->setDisabled(true);
     //writeSettings();
 }
 
@@ -165,7 +159,7 @@ void MainWindow::on_mask_slide_sliderMoved(int position)
         case 3: display = " - Smallest Noise-Free Mask"; break;
         case 4: display = " - Good Mask Size for this image size"; break;
         default: display = ""; break;
-        }
+        }; break;
     case 640:
         switch(mask){
         case 0:
@@ -175,7 +169,7 @@ void MainWindow::on_mask_slide_sliderMoved(int position)
         case 4: display = " - Smallest Noise-Free Mask"; break;
         case 5: display = " - Good Mask Size for this image size"; break;
         default: display = ""; break;
-        }
+        }; break;
     case 800:
         switch(mask){
         case 0:
@@ -186,7 +180,7 @@ void MainWindow::on_mask_slide_sliderMoved(int position)
         case 5: display = " - Smallest Noise-Free Mask"; break;
         case 6: display = " - Good Mask Size for this image size"; break;
         default: display = ""; break;
-        }
+        }; break;
     }
     ui->label_mask_hint->setText(QString::number(mask)+display);
     ui->label_mask_hint->move(coords);
@@ -202,16 +196,35 @@ void MainWindow::on_pushButton_settings_clicked()
 }
 
 void MainWindow::on_pushButton_stop_clicked()
-{   //Disable widgets
-    ui->mask_slide->setEnabled(true); ui->maskEdit->setEnabled(true);
-    ui->dial->setEnabled(true); ui->frameAv->setEnabled(true);
-    ui->pushButton->hide();
-    //Show button
-    ui->pushButton->show(); ui->pushButton_stop->hide(); ui->pushButton_settings->setEnabled(true);
+{
+    op->stop();
+    show_widgets(true);
 
-    op->finishAndClose(true);
 }
 
+
+void MainWindow::show_widgets(bool show)
+{
+    if(!show)
+    {
+        qDebug() << "finished signal";
+        //Disable widgets
+        ui->mask_slide->setDisabled(true); ui->maskEdit->setDisabled(true);
+        ui->dial->setDisabled(true); ui->frameAv->setDisabled(true);
+        //Hide button
+        ui->pushButton->hide(); ui->pushButton_stop->show(); ui->pushButton_settings->setDisabled(true);
+
+    }
+    else
+    {
+        //Enable widgets
+        ui->mask_slide->setEnabled(true); ui->maskEdit->setEnabled(true);
+        ui->dial->setEnabled(true); ui->frameAv->setEnabled(true);
+        ui->pushButton->hide();
+        //Show button
+        ui->pushButton->show(); ui->pushButton_stop->hide(); ui->pushButton_settings->setEnabled(true);
+    }
+}
 
 //Read and write last saved values
 void MainWindow::writeSettings(bool new_ones){

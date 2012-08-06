@@ -7,7 +7,7 @@
 #include "operations.h"
 
 namespace Ui {
-    class MainWindow;
+class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -35,7 +35,7 @@ public:
     bool delete_images;
 
     QString image_dir;
-/////////////////////
+    /////////////////////
 
     enum ScreenOrientation {
         ScreenOrientationLockPortrait,
@@ -62,6 +62,8 @@ private slots:
     void on_pushButton_settings_clicked();
 
     void on_pushButton_stop_clicked();
+
+    void show_widgets(bool show);
 
 private:
     Ui::MainWindow *ui;
