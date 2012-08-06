@@ -1,0 +1,10 @@
+See how mask detection varies with image size --- which needs to be an advanced variable.
+
+Create an Options Window:
+    Video FileName
+
+
+Find out what's causing segmentation fault -- i.e. print out all args from settings to see if they're being passed correctly to Operations.
+Fix function.cpp so that it outputs current info
+
+See how noise Mask increases with image size.
