@@ -29,6 +29,7 @@ void terminalAction(QString command, bool show_output=false)
     qp = new QProcess;
     qp->start("/bin/sh", args);
     qp->waitForFinished();
+    qp->close();
     qp->terminate();
 }
 
@@ -62,4 +63,10 @@ bool lensClosed() {
     char state = fgetc(ff);   // file contains either "open" or "closed"
     fclose(ff);
     return state == 'c';
+}
+
+//replace with phone function in main app
+void alert(QString text){
+    QString notif = QString("dbus-send --type=method_call --dest=org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications.SystemNoteInfoprint string:%1"+text+"%1").arg(QChar(0x22));
+    terminalAction(notif);
 }
