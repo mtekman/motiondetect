@@ -24,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     //initialise camerathread here. PRevent pointer problems with settings.
     op = new Operations;
 
+    connect(op, SIGNAL(finished()), this, SLOT(restoreInterface()));  //returns interfacr to normal on close
+
     readLastWorkingSettings();
     width = op->width;
 }
@@ -102,7 +104,6 @@ void MainWindow::on_pushButton_clicked()
     show_widgets(false);
 
     op->start();
-
 }
 
 
@@ -186,15 +187,14 @@ void MainWindow::on_pushButton_settings_clicked()
     set->exec();
 
     readLastWorkingSettings();
-    size = set->width;
-
-    //    this->show();
+    width = set->width;
+    size = set->size;
 }
 
 void MainWindow::on_pushButton_stop_clicked()
 {
     op->stop();
-    show_widgets(true);
+    restoreInterface();
 }
 
 
@@ -202,7 +202,6 @@ void MainWindow::show_widgets(bool show)
 {
     if(!show)
     {
-        qDebug() << "finished signal";
         //Disable widgets
         ui->mask_slide->setDisabled(true); ui->maskEdit->setDisabled(true);
         ui->dial->setDisabled(true); ui->frameAv->setDisabled(true);
@@ -310,4 +309,9 @@ void MainWindow::readLastWorkingSettings()
         writeSettings(true);
     }
 
+}
+
+void MainWindow::restoreInterface(){
+    qDebug() << "return interface";
+    show_widgets(true);
 }

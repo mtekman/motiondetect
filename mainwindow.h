@@ -38,6 +38,8 @@ public:
     void showExpanded();
 
 private slots:
+    void restoreInterface();
+
     void on_pushButton_clicked();
     void on_dial_actionTriggered();
 
