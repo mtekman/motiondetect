@@ -1,1 +1,6 @@
 Weird email error where it says that I should check to se if I have SMTP access to gmail...
+--- Fixed. Turned out to be gmail wasnt configured properly.
+
+Bug where FCam keeps using dark images as reference frames
+---- Fixed. Turned out to be that I removed the histogram unit, which is necesary for the autoexpose alogirthm to work
+--Added a small if statement that checks if totalN (which is now neccesary) is == 0. If so, the autoExpose alogirthm is once again called.
