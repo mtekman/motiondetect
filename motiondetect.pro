@@ -23,13 +23,11 @@ symbian:TARGET.CAPABILITY += NetworkServices
 # MOBILITY +=
 
 SOURCES += main.cpp mainwindow.cpp \
-    noticebox.cpp \
     settings.cpp \
     emailthread.cpp \
     operations.cpp \
     functions.cpp
 HEADERS += mainwindow.h \
-    noticebox.h \
     settings.h \
     emailthread.h \
     operations.h \
