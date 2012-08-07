@@ -30,8 +30,7 @@ public:
 
     //double triggerFract
     //Time is in microseconds *10^-6
-    Operations(int w=320, int h=240, int exp=1000000, float gain=1.0f,
-               bool histogram=true);
+    Operations(int exp=1000000, float gain=1.0f);
     void finishAndClose();
     //No destructor
 

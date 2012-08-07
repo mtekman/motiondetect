@@ -38,8 +38,9 @@ void Operations::run(){
     save_dir = image_dir;
 
     qDebug() << "Started";
-    getStaticBGImage();
-    qDebug() << "Got static";
+    //getStaticBGImage();
+    //qDebug() << "Got static";
+
     updateReferenceImage();
     checkMovement(interval_default,limitVal);
     finishAndClose();
@@ -47,9 +48,8 @@ void Operations::run(){
 }
 
 
-Operations::Operations(int w, int h, int exp, float gain, bool histogram){   
+Operations::Operations(int exp, float gain){
     willStop = false;
-    width = w; height = h; //update static class vars
     // Check compatiblity
     errorCheck();
     // Set the shot parameters
@@ -57,11 +57,8 @@ Operations::Operations(int w, int h, int exp, float gain, bool histogram){
     stream1.gain = gain;
     // Request an image size and allocate storage
     stream1.image = FCam::Image(width, height, FCam::UYVY);
-    // Enable the histogram unit
-    stream1.histogram.enabled = histogram;
-    stream1.histogram.region = FCam::Rect(0, 0, width, height);
 
-    if(lensClosed()) {}//Do something.
+    //if(lensClosed()) {}//Do something.
 
 }
 
