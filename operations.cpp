@@ -35,15 +35,24 @@ QString save_dir;
 
 void Operations::run(){
     qDebug() << "Starting";
-    save_dir = image_dir;
+    bool closed = false;
+    if(closed = lensClosed()) {
+        qDebug() << closed;
+        willStop = true;
+        //finishAndClose();
+        alert("Make sure lens cap is open");
+    }
+    else{
+        save_dir = image_dir;
 
-    qDebug() << "Started";
-    //getStaticBGImage();
-    //qDebug() << "Got static";
+        qDebug() << "Started";
+        //getStaticBGImage();
+        //qDebug() << "Got static";
 
-    updateReferenceImage();
-    checkMovement(interval_default,limitVal);
-    finishAndClose();
+        updateReferenceImage();
+        checkMovement(interval_default,limitVal);
+        finishAndClose();
+    }
     qDebug() << "Finished.";
 }
 
@@ -57,9 +66,6 @@ Operations::Operations(int exp, float gain){
     stream1.gain = gain;
     // Request an image size and allocate storage
     stream1.image = FCam::Image(width, height, FCam::UYVY);
-
-    //if(lensClosed()) {}//Do something.
-
 }
 
 void Operations::finishAndClose(){
@@ -88,14 +94,11 @@ void Operations::errorCheck() {
     while (FCam::getNextEvent(&e, FCam::Event::Error)) {
         qDebug() << QString("Error: %1").arg(e.description.c_str());
         if (e.data == FCam::Event::DriverMissingError) {
-            qDebug() << "example1: FCam can't find its driver. Did you install "
-                   "fcam-drivers on your platform, and reboot the device "
-                   "after installation?";
+            qDebug() << "fcam-drivers missing. Please install, then reboot.";
             exit(1);
         }
         if (e.data == FCam::Event::DriverLockedError) {
-            qDebug() << "example1: Another FCam program appears to be running "
-                   "already. Only one can run at a time.";
+            qDebug() << "Another FCam is running";
             exit(1);
         }
     }
