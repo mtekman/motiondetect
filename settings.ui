@@ -18,7 +18,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>791</width>
+     <width>781</width>
      <height>381</height>
     </rect>
    </property>
@@ -28,7 +28,7 @@
     </font>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -46,17 +46,10 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="4" colspan="2">
+        <item row="1" column="4" rowspan="3" colspan="2">
          <widget class="QDial" name="dial_whitepixel"/>
         </item>
-        <item row="3" column="0">
-         <widget class="QPushButton" name="pushButton_save">
-          <property name="text">
-           <string>Save</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="4">
+        <item row="1" column="0" rowspan="3" colspan="4">
          <widget class="QDial" name="dial_interval"/>
         </item>
         <item row="0" column="0" colspan="3">
@@ -103,13 +96,6 @@
         <item row="0" column="5">
          <widget class="QLineEdit" name="lineEdit_whitepixel"/>
         </item>
-        <item row="3" column="5">
-         <widget class="QPushButton" name="pushButton_reset">
-          <property name="text">
-           <string>Reset ALL</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
      </layout>
@@ -143,6 +129,11 @@
         </item>
         <item row="0" column="1">
          <widget class="QLineEdit" name="lineEdit_image_dir">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>/home/user/MyDocs/DCIM/MISC/</string>
           </property>
@@ -150,6 +141,11 @@
         </item>
         <item row="1" column="0">
          <widget class="QPushButton" name="pushButton_browse">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
           <property name="text">
            <string>Browse</string>
           </property>
@@ -159,6 +155,11 @@
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
            <widget class="QCheckBox" name="checkBox_convertImages">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Convert Images to MPG on Exit</string>
             </property>
@@ -166,6 +167,11 @@
           </item>
           <item>
            <widget class="QCheckBox" name="checkBox_deleteImages_after_convert">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>Delete Images after Convert</string>
             </property>
@@ -197,7 +203,7 @@
          <widget class="QLabel" name="label_size">
           <property name="font">
            <font>
-            <pointsize>12</pointsize>
+            <pointsize>20</pointsize>
            </font>
           </property>
           <property name="text">
@@ -219,7 +225,7 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>791</width>
+       <width>781</width>
        <height>311</height>
       </rect>
      </property>
@@ -231,7 +237,7 @@
        <widget class="QLabel" name="label">
         <property name="font">
          <font>
-          <pointsize>6</pointsize>
+          <pointsize>8</pointsize>
          </font>
         </property>
         <property name="text">
@@ -247,6 +253,11 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>tetris11@gmail.com</string>
         </property>
@@ -256,7 +267,7 @@
        <widget class="QLabel" name="label_2">
         <property name="font">
          <font>
-          <pointsize>6</pointsize>
+          <pointsize>8</pointsize>
          </font>
         </property>
         <property name="text">
@@ -272,6 +283,11 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Motion  Detected</string>
         </property>
@@ -281,7 +297,7 @@
        <widget class="QCheckBox" name="checkBox_attach">
         <property name="font">
          <font>
-          <pointsize>6</pointsize>
+          <pointsize>9</pointsize>
          </font>
         </property>
         <property name="text">
@@ -293,7 +309,7 @@
        <widget class="QLabel" name="label_3">
         <property name="font">
          <font>
-          <pointsize>6</pointsize>
+          <pointsize>8</pointsize>
          </font>
         </property>
         <property name="text">
@@ -303,6 +319,11 @@
       </item>
       <item row="4" column="1">
        <widget class="QPlainTextEdit" name="plainTextEdit_message">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
         <property name="plainText">
          <string>Howdy</string>
         </property>
@@ -312,7 +333,7 @@
        <widget class="QCheckBox" name="checkBox_email">
         <property name="font">
          <font>
-          <pointsize>6</pointsize>
+          <pointsize>9</pointsize>
          </font>
         </property>
         <property name="text">
@@ -323,6 +344,25 @@
      </layout>
     </widget>
    </widget>
+  </widget>
+  <widget class="QPushButton" name="pushButton_reset">
+   <property name="geometry">
+    <rect>
+     <x>560</x>
+     <y>4</y>
+     <width>228</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="text">
+    <string>Reset ALL</string>
+   </property>
   </widget>
  </widget>
  <resources/>

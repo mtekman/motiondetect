@@ -13,6 +13,8 @@ class Settings : public QDialog
 
 public:
     int width;
+    QString size;
+
     explicit Settings(QWidget *parent = 0);
     ~Settings();
 

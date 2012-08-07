@@ -95,7 +95,7 @@ void Settings::on_dial_size_sliderMoved(int position)
 {
     // Valid UYVY Sizes:  (320, 240), (640, 480), (800, 600), (1280, 960), (2560, 1920);
     int size_index = position/25;
-    int height;
+    int height = 240;
 
     switch(size_index){
     case 0: width=320; height=240; break;
@@ -104,7 +104,6 @@ void Settings::on_dial_size_sliderMoved(int position)
     case 3: width=1280; height = 960; break;
     //case 4: width=2560; height = 1920; break; <--- Too slow. Dropped.
     }
-
     ui->label_size->setText(QString::number(width)+" x "+QString::number(height));
 }
 
@@ -132,9 +131,11 @@ void Settings::writeSettings(){
     settings.setValue("convert_video", ui->checkBox_convertImages->isChecked());
     settings.setValue("delete_images", ui->checkBox_deleteImages_after_convert->isChecked());
 
-    QStringList size = ui->label_size->text().split("x");
-    settings.setValue("width", size.first().toInt());
-    settings.setValue("height", size.last().toInt());
+    size = ui->label_size->text();
+
+    QStringList sizeL = ui->label_size->text().split("x");
+    settings.setValue("width", sizeL.first().toInt());
+    settings.setValue("height", sizeL.last().toInt());
 
     settings.setValue("tab_number", ui->tabWidget->currentIndex());
 
