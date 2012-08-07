@@ -13,7 +13,6 @@ MainWindow::MainWindow(QWidget *parent)
     this->setWindowFlags(Qt::Window);
 #endif
     ui->setupUi(this);
-    ui->frameAv->display(1);
     ui->pushButton_stop->hide();
     ui->label_mask_hint->hide();
 
@@ -93,10 +92,9 @@ void MainWindow::on_pushButton_clicked()
 {
     readLastWorkingSettings();
 
-    op->frameNum = ui->frameAv->value();
     op->erodeVar = ui->maskEdit->text().toInt();
 
-    qDebug() << " frame:" << op->frameNum << " mask:" << op->erodeVar << " thresh:" << op->limitVal << " interval:" << op->interval_default
+    qDebug() << " mask:" << op->erodeVar << " thresh:" << op->limitVal << " interval:" << op->interval_default
              << " email:" << op->emailAlert << op->email_message << op->email_address << op->email_subject << op->email_attach
              << " convert:" << op->convert_images << " delete:" << op->delete_images << " width,height" << op->width << op->height
              << "image dir:" << op->image_dir;
@@ -106,13 +104,6 @@ void MainWindow::on_pushButton_clicked()
     op->start();
 }
 
-
-void MainWindow::on_dial_actionTriggered()
-{
-    int val = ui->dial->value()/4;
-    if(val!=0) ui->frameAv->display(val);
-    else ui->frameAv->display(1);
-}
 
 void MainWindow::on_mask_slide_sliderMoved(int position)
 {
@@ -124,7 +115,7 @@ void MainWindow::on_mask_slide_sliderMoved(int position)
 
     int slider_pos = height * ((float)(position)/(float)100);
 
-    QPoint coords(200, ui->mask_slide->pos().y()+ (height - slider_pos ) );
+    QPoint coords(80, ui->mask_slide->pos().y()+ (height - slider_pos ) - 80);
     QString display(" ");
 
     //Statements
@@ -204,7 +195,6 @@ void MainWindow::show_widgets(bool show)
     {
         //Disable widgets
         ui->mask_slide->setDisabled(true); ui->maskEdit->setDisabled(true);
-        ui->dial->setDisabled(true); ui->frameAv->setDisabled(true);
         //Hide button
         ui->pushButton->hide(); ui->pushButton_stop->show(); ui->pushButton_settings->setDisabled(true);
         ui->label_mask_hint->hide();
@@ -214,7 +204,6 @@ void MainWindow::show_widgets(bool show)
     {
         //Enable widgets
         ui->mask_slide->setEnabled(true); ui->maskEdit->setEnabled(true);
-        ui->dial->setEnabled(true); ui->frameAv->setEnabled(true);
         ui->pushButton->hide();
         //Show button
         ui->pushButton->show(); ui->pushButton_stop->hide(); ui->pushButton_settings->setEnabled(true);
@@ -276,7 +265,6 @@ void MainWindow::readLastWorkingSettings()
         QSettings settings("fcam");
         settings.beginGroup("main");
 
-        //ui->frameAv->display();
         int slide = settings.value("mask_slider").toInt();
         size = settings.value("size_label").toString();
 
@@ -286,7 +274,7 @@ void MainWindow::readLastWorkingSettings()
         op->limitVal = settings.value("whitepix_value").toInt();
         op->interval_default = settings.value("interval_value").toInt();
 
-        op->emailAlert = settings.value("email").toBool();
+        op->emailAlert = settings.value("email_bool").toBool();
         op->email_message = settings.value("email_message").toString();
         op->email_address = settings.value("email_address").toString();
         op->email_subject = settings.value("email_subject").toString();

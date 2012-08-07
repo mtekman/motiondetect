@@ -7,8 +7,9 @@ EmailThread::EmailThread(const QString &address, const QString &subject, const Q
 {
     QString email = "echo '"+message+"' | mailcmd "+
             ((attach)?("-a "+attach_name+" "):(" "))
-            +"-s "+subject+" "+address;
+            +"-s '"+subject+"' "+address;
 
+    qDebug() << email;
     QStringList args;
     args << "-c" << email;
     qp = new QProcess;
@@ -21,3 +22,5 @@ EmailThread::~EmailThread()
     qp->terminate();
     qDebug() << "email sent.";
 }
+
+//TODO: Timestamp for image

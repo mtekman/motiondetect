@@ -171,7 +171,6 @@ void Settings::readSettings(){
     ui->label_size->setText(settings.value("size_label").toString());
 
     bool em = settings.value("email_bool").toBool();
-    qDebug() << "EMAIL: " << em;
     ui->checkBox_email->setChecked(em);
     on_checkBox_email_clicked(em);
 

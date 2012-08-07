@@ -1,10 +1,10 @@
 See how mask detection varies with image size --- which needs to be an advanced variable.
 
-Create an Options Window:
+Create in Settings Window:
     Video FileName
 
+    Timestamp for subject text in email tab
 
-Find out what's causing segmentation fault -- i.e. print out all args from settings to see if they're being passed correctly to Operations.
-Fix function.cpp so that it outputs current info
 
-See how noise Mask increases with image size.
+(optional)    Display image in mainwindow option.
+(optionnal)    Display image in mainwindow with overlay of subtracted image for showing where motion occured.
