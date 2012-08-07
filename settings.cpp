@@ -1,7 +1,6 @@
 #include "settings.h"
 #include "ui_settings.h"
 #include <QFileDialog>
-#include "noticebox.h"
 #include <QDebug>
 #include <QSettings>
 #include <QTabWidget>
@@ -29,19 +28,8 @@ Settings::~Settings()
 //override
 void Settings::closeEvent(QCloseEvent *event){
     event->ignore();
-    if(saved) event->accept();
-    else if (!saved){
-        noticebox *nb = new noticebox(this);
-        nb->exec();
-        if(nb->save){
-            on_pushButton_save_clicked();
-            event->accept();
-        }
-        else if (!nb->save){
-            event->accept();
-        }
-        //delete nb;
-    }
+    writeSettings();
+    event->accept();
 }
 
 void Settings::on_dial_interval_sliderMoved(int position)
@@ -62,7 +50,7 @@ void Settings::on_pushButton_reset_clicked()
 
     //Email
     ui->checkBox_attach->setChecked(false);
-    ui->lineEdit_Address->setText("tetris11@gmail.com");
+    ui->lineEdit_Address->setText("blank@blanketyblank.blank");
     ui->lineEdit_Subject->setText("Motion Detected");
     ui->plainTextEdit_message->setPlainText("Howdy");
 
@@ -103,37 +91,18 @@ void Settings::on_pushButton_browse_clicked()
 
 }
 
-void Settings::on_pushButton_save_clicked()
-{
-    qDebug() << "saving settings";
-    email = ui->checkBox_email->isChecked();
-    email_attach = ui->checkBox_attach->isChecked();
-    email_address = ui->lineEdit_Address->text();
-    email_subject = ui->lineEdit_Subject->text();
-    email_message = ui->plainTextEdit_message->toPlainText();
-
-    image_dir = ui->lineEdit_image_dir->text();
-
-    convert_video = ui->checkBox_convertImages->isChecked();
-    delete_images = ui->checkBox_deleteImages_after_convert->isChecked();
-
-    interval =  ui->lineEdit_interval->text().toUInt();
-    whitepixel = ui->lineEdit_whitepixel->text().toUInt();
-
-    saved = true;
-    writeSettings();
-}
-
 void Settings::on_dial_size_sliderMoved(int position)
 {
     // Valid UYVY Sizes:  (320, 240), (640, 480), (800, 600), (1280, 960), (2560, 1920);
-    int size_index = position/20;
+    int size_index = position/25;
+    int height;
+
     switch(size_index){
     case 0: width=320; height=240; break;
     case 1: width=640; height=480; break;
-    case 2: width = 800; height = 600; break;
-    case 3: width = 1280; height = 960; break;
-    case 4: width = 2560; height = 1920; break;
+    case 2: width=800; height = 600; break;
+    case 3: width=1280; height = 960; break;
+    //case 4: width=2560; height = 1920; break; <--- Too slow. Dropped.
     }
 
     ui->label_size->setText(QString::number(width)+" x "+QString::number(height));
@@ -145,27 +114,34 @@ void Settings::writeSettings(){
     QSettings settings("fcam");
     settings.beginGroup("main");
     settings.setValue("interval_slider", ui->dial_interval->value());
-    settings.setValue("interval_value", interval);
+    settings.setValue("interval_value", ui->lineEdit_interval->text().toUInt());
 
     settings.setValue("whitepixel_slider", ui->dial_whitepixel->value());
-    settings.setValue("whitepix_value", whitepixel);
+    settings.setValue("whitepix_value", ui->lineEdit_whitepixel->text().toUInt());
 
     settings.setValue("size_slider", ui->dial_size->value());
     settings.setValue("size_label", ui->label_size->text());
 
     settings.setValue("email_bool",ui->checkBox_email->isChecked());
     settings.setValue("attach",ui->checkBox_attach->isChecked());
-    settings.setValue("email_address", email_address);
-    settings.setValue("email_subject", email_subject);
-    settings.setValue("email_message", email_address);
+    settings.setValue("email_address", ui->lineEdit_Address->text());
+    settings.setValue("email_subject", ui->lineEdit_Subject->text());
+    settings.setValue("email_message", ui->plainTextEdit_message->toPlainText());
 
-    settings.setValue("image_dir", image_dir);
-    settings.setValue("convert_video", convert_video);
-    settings.setValue("delete_images", delete_images);
+    settings.setValue("image_dir", ui->lineEdit_Address->text());
+    settings.setValue("convert_video", ui->checkBox_convertImages->isChecked());
+    settings.setValue("delete_images", ui->checkBox_deleteImages_after_convert->isChecked());
+
+    QStringList size = ui->label_size->text().split("x");
+    settings.setValue("width", size.first().toInt());
+    settings.setValue("height", size.last().toInt());
 
     settings.setValue("tab_number", ui->tabWidget->currentIndex());
 
     settings.endGroup();
+
+
+    qDebug() << "Settings.cpp: settings saved";
 }
 
 

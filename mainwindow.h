@@ -3,6 +3,7 @@
 
 #include <QtGui/QMainWindow>
 #include <QLabel>
+#include <QSettings>
 #include "settings.h"
 #include "operations.h"
 
@@ -17,25 +18,8 @@ public:
     Settings *set;
     Operations *op;
 
-    //Duplicate variables in Operations.... sigh
-    int interval_default;
-    int width, height;
-
-    int frameNum;
-    int limitVal;
-    int erodeVar;
-
-    bool emailAlert;
-    QString email_message;
-    QString email_address;
-    QString email_subject;
-    bool email_attach;
-
-    bool convert_images;
-    bool delete_images;
-
-    QString image_dir;
-    /////////////////////
+    int width; //here for switch statements in moveSLider()
+    QString size;
 
     enum ScreenOrientation {
         ScreenOrientationLockPortrait,
@@ -67,8 +51,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    void readLastWorkingSettings(bool exists=true);
+    void readLastWorkingSettings();
     void writeSettings(bool new_ones=false);
+
 };
 
 #endif // MAINWINDOW_H

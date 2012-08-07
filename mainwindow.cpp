@@ -15,18 +15,18 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->frameAv->display(1);
     ui->pushButton_stop->hide();
+    ui->label_mask_hint->hide();
 
     //Share ImageLabel -- so that Operations can access it.
     img = ui->imageLab;
+    ui->label_mask_hint->show();
 
-   //Load Settings --- doesnt work
-    if(!QSettings("Motion","Detect").contains("image_dir") )
-    {
-        readLastWorkingSettings(false);
-    }
+    //initialise camerathread here. PRevent pointer problems with settings.
+    op = new Operations;
+
+    readLastWorkingSettings();
+    width = op->width;
 }
-
-bool settings_pressed = false;
 
 MainWindow::~MainWindow()
 {
@@ -91,24 +91,6 @@ void MainWindow::on_pushButton_clicked()
 {
     readLastWorkingSettings();
 
-    op = new Operations(width, height);
-
-    //connect(ui->pushButton_stop, SIGNAL(clicked()), op, SLOT(stop()));
-
-    op->limitVal = limitVal;
-    op->interval_default = interval_default;
-
-    op->emailAlert = emailAlert;
-    op->email_message = email_message;
-    op->email_address = email_address;
-    op->email_subject = email_subject;
-    op->email_attach = email_attach;
-
-    op->convert_images = convert_images;
-    op->delete_images = delete_images;
-
-    op->image_dir = image_dir;
-
     op->frameNum = ui->frameAv->value();
     op->erodeVar = ui->maskEdit->text().toInt();
 
@@ -119,14 +101,9 @@ void MainWindow::on_pushButton_clicked()
 
     show_widgets(false);
 
-    qDebug() << "YOU";
     op->start();
-    qDebug() << "NRW";
 
-    //writeSettings();
 }
-
-//TODO REVERT BACK TO HAVINFG NO DUPLICATES
 
 
 void MainWindow::on_dial_actionTriggered()
@@ -142,7 +119,6 @@ void MainWindow::on_mask_slide_sliderMoved(int position)
     ui->maskEdit->setText(QString::number(mask));
 
     //Roaming QLabel with size hints
-
     int height = ui->mask_slide->rect().height();
 
     int slider_pos = height * ((float)(position)/(float)100);
@@ -150,14 +126,20 @@ void MainWindow::on_mask_slide_sliderMoved(int position)
     QPoint coords(200, ui->mask_slide->pos().y()+ (height - slider_pos ) );
     QString display(" ");
 
+    //Statements
+    QString warn = " - Warning: Mask value this low detects noise\nfor image size "+size;
+    QString small =" - Smallest Noise-Free Mask";
+    QString good = " - Good Mask Size for "+size;
+
+
     switch(width){
     case 320:
         switch(mask){
         case 0:
         case 1:
-        case 2: display = " - Warning: Mask value this low detects noise\nfor this image size"; break;
-        case 3: display = " - Smallest Noise-Free Mask"; break;
-        case 4: display = " - Good Mask Size for this image size"; break;
+        case 2: display = warn; break;
+        case 3: display = small; break;
+        case 4: display = good; break;
         default: display = ""; break;
         }; break;
     case 640:
@@ -165,9 +147,9 @@ void MainWindow::on_mask_slide_sliderMoved(int position)
         case 0:
         case 1:
         case 2:
-        case 3: display = " - Warning: Mask value this low detects noise\nfor this image size"; break;
-        case 4: display = " - Smallest Noise-Free Mask"; break;
-        case 5: display = " - Good Mask Size for this image size"; break;
+        case 3: display = warn; break;
+        case 4: display = small; break;
+        case 5: display = good; break;
         default: display = ""; break;
         }; break;
     case 800:
@@ -176,9 +158,21 @@ void MainWindow::on_mask_slide_sliderMoved(int position)
         case 1:
         case 2:
         case 3:
-        case 4: display = " - Warning: Mask value this low detects noise\nfor this image size"; break;
-        case 5: display = " - Smallest Noise-Free Mask"; break;
-        case 6: display = " - Good Mask Size for this image size"; break;
+        case 4: display = warn; break;
+        case 5: display = small; break;
+        case 6: display = good; break;
+        default: display = ""; break;
+        }; break;
+    case 1280:
+        switch(mask){
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5: display = warn; break;
+        case 6: display = small; break;
+        case 7: display = good; break;
         default: display = ""; break;
         }; break;
     }
@@ -188,10 +182,12 @@ void MainWindow::on_mask_slide_sliderMoved(int position)
 
 void MainWindow::on_pushButton_settings_clicked()
 {
-    settings_pressed = true;
     set = new Settings(this);
     set->exec();
-    writeSettings();
+
+    readLastWorkingSettings();
+    size = set->width;
+
     //    this->show();
 }
 
@@ -199,7 +195,6 @@ void MainWindow::on_pushButton_stop_clicked()
 {
     op->stop();
     show_widgets(true);
-
 }
 
 
@@ -213,6 +208,7 @@ void MainWindow::show_widgets(bool show)
         ui->dial->setDisabled(true); ui->frameAv->setDisabled(true);
         //Hide button
         ui->pushButton->hide(); ui->pushButton_stop->show(); ui->pushButton_settings->setDisabled(true);
+        ui->label_mask_hint->hide();
 
     }
     else
@@ -223,6 +219,7 @@ void MainWindow::show_widgets(bool show)
         ui->pushButton->hide();
         //Show button
         ui->pushButton->show(); ui->pushButton_stop->hide(); ui->pushButton_settings->setEnabled(true);
+        ui->label_mask_hint->show();
     }
 }
 
@@ -230,24 +227,10 @@ void MainWindow::show_widgets(bool show)
 void MainWindow::writeSettings(bool new_ones){
     if(!new_ones)
     {
-        QSettings settings("Motion","Detect");
+        QSettings settings("fcam");
         settings.beginGroup("main");
-        settings.setValue("width", set->width);
-        settings.setValue("height", set->height);
 
         settings.setValue("mask_slider", ui->mask_slide->value());
-        settings.setValue("interval", set->interval);
-        settings.setValue("whitepix_value", set->whitepixel);
-
-        settings.setValue("email_bool", set->email);
-        settings.setValue("attach", set->email_attach);
-        settings.setValue("email_address", set->email_address);
-        settings.setValue("email_subject", set->email_subject);
-        settings.setValue("email_message", set->email_address);
-
-        settings.setValue("image_dir", set->image_dir);
-        settings.setValue("convert_video", set->convert_video);
-        settings.setValue("delete_images", set->delete_images);
 
         settings.endGroup();
     }
@@ -255,13 +238,13 @@ void MainWindow::writeSettings(bool new_ones){
     {
         qDebug() << "writing new settings";
 
-        QSettings settings("Motion","Detect");
+        QSettings settings("fcam");
         settings.beginGroup("main");
         settings.setValue("width", 320);
         settings.setValue("height", 240);
 
         settings.setValue("mask_slider", 5);
-        settings.setValue("interval", 2000);
+        settings.setValue("interval_value", 2000);
         settings.setValue("whitepix_value", 100);
 
         settings.setValue("email_bool",false);
@@ -276,53 +259,54 @@ void MainWindow::writeSettings(bool new_ones){
 
         settings.endGroup();
 
+        //Now execute
         readLastWorkingSettings();
 
     }
 }
 
 
-void MainWindow::readLastWorkingSettings(bool exists)
+void MainWindow::readLastWorkingSettings()
 {
-    qDebug() << "exists: " << exists;
+    QSettings settings("fcam");
+    settings.beginGroup("main");
+    bool exists = !settings.value("width").isNull();
+
     if (exists)
     {
-        qDebug() << "setting values for Op";
-
-        QSettings settings("Motion","Detect");
+        QSettings settings("fcam");
         settings.beginGroup("main");
 
         //ui->frameAv->display();
         int slide = settings.value("mask_slider").toInt();
+        size = settings.value("size_label").toString();
+
         ui->mask_slide->setValue(slide);
         on_mask_slide_sliderMoved(slide);
 
-        limitVal = settings.value("whitepix_value").toInt();
-        interval_default = settings.value("interval").toInt();
+        op->limitVal = settings.value("whitepix_value").toInt();
+        op->interval_default = settings.value("interval_value").toInt();
 
-        emailAlert = settings.value("email").toBool();
-        email_message = settings.value("email_message").toString();
-        email_address = settings.value("email_address").toString();
-        email_subject = settings.value("email_subject").toString();
-        email_attach = settings.value("attach").toBool();
+        op->emailAlert = settings.value("email").toBool();
+        op->email_message = settings.value("email_message").toString();
+        op->email_address = settings.value("email_address").toString();
+        op->email_subject = settings.value("email_subject").toString();
+        op->email_attach = settings.value("attach").toBool();
 
-        convert_images = settings.value("convert_images").toBool();
-        delete_images = settings.value("delete_images").toBool();
+        op->convert_images = settings.value("convert_video").toBool();
+        op->delete_images = settings.value("delete_images").toBool();
 
-        width = settings.value("width").toInt();
-        height = settings.value("height").toInt();
+        op->width = settings.value("width").toInt();
+        op->height = settings.value("height").toInt();
 
-        image_dir = settings.value("image_dir").toString();
+        op->image_dir = settings.value("image_dir").toString();
 
         settings.endGroup();
-
-        qDebug() << "finished setting values for op";
 
 
     }
     else if(!exists)
     {
-        //If settings dont exist, then write new ones
         writeSettings(true);
     }
 

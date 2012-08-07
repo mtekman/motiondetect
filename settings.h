@@ -12,19 +12,7 @@ class Settings : public QDialog
     Q_OBJECT
 
 public:
-    unsigned short width, height;
-
-    bool email;
-    bool email_attach;
-    QString email_address, email_subject, email_message;
-
-    QString image_dir;
-
-    bool convert_video;
-    bool delete_images;
-
-    unsigned int interval, whitepixel;
-
+    int width;
     explicit Settings(QWidget *parent = 0);
     ~Settings();
 
@@ -42,9 +30,6 @@ private slots:
     void on_checkBox_email_clicked(bool checked);
 
     void on_pushButton_browse_clicked();
-
-
-    void on_pushButton_save_clicked();
 
     void on_dial_size_sliderMoved(int position);
 
