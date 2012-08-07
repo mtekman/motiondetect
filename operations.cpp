@@ -35,11 +35,7 @@ QString save_dir;
 
 void Operations::run(){
     qDebug() << "Starting";
-    if(!validKernel()){
-        willStop = true;
-        alert("Please boot into a valid kernel. Kernel-Powerv51 does not support FCam");
-    }
-    else if(lensClosed()) {
+    if(lensClosed()) {
         willStop = true;
         alert("Make sure lens cap is open");
     }
@@ -141,8 +137,6 @@ void Operations::defineGoodExposure(int stableframenum)
 
         exposure = frame1.exposure() * frame1.gain();
 
-        //qDebug() << "Stable exposure count:" << stableCount;
-
         // Increment stableCount if the exposure is within 5% of the
         // previous one
         if (fabs(exposure - lastExposure) < 0.02f * lastExposure)
@@ -157,12 +151,9 @@ void Operations::defineGoodExposure(int stableframenum)
 
         // Update lastExposure
         lastExposure = exposure;
-        // Increment frame counter
-        //qDebug() << "Frame: " <<
         count++;
     } while (stableCount < stableframenum); // Terminate when stable for 10 frames
     //Constant background image obtained, now make greyscale
-    FCam::saveJPEG(frame1.image(), "/home/user/MyDocs/DCIM/Greggg.jpg");
 
 }
 
@@ -170,6 +161,10 @@ void Operations::updateReferenceImage(){
 
     stream1.frameTime = 0; // fast as possible (min exposure)
     sensor1.stream(stream1);   //apply params
+
+    //Adapt brightness
+    defineGoodExposure(4);
+
 
     frame1 = sensor1.getFrame(); //grab first frame
     assert(frame1.shot().id == stream1.id); // check source matches.
@@ -180,7 +175,6 @@ void Operations::updateReferenceImage(){
     convertImage(image, img);
 
     reference = img/norm;
-    (reference*norm).save_jpeg("/home/user/MyDocs/DCIM/gerog.jpg");
     qDebug() << "Updated reference image";
 }
 
@@ -225,17 +219,8 @@ void Operations::checkMovement(int interval, int limit)
 
         qDebug() << "Totals: Normal - " << totalN << ", Noise Removal -" << totalE << " count=" << count;
 
-
-        if(totalN == 0)
-        {
-            qDebug()  << "Bad Reference";
-            //Bad Reference Image -- run autoExpose, and update ref
-            defineGoodExposure(4);
-            updateReferenceImage();
-        }
-
         //6. Check for movement -- if so: get new reference image
-        else if (totalE > limit)
+        if (totalE > limit)
         {
             qDebug() << "GOTCHA!";
             record(10,20);             //record 10 images in quick succession.

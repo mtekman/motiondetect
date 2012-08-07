@@ -5,6 +5,9 @@ Create in Settings Window:
 
     Timestamp for subject text in email tab
 
+    Change emergency stop to regular stop -that can save images.
+    Two pressed means emergency stop.
+
 
 (optional)    Display image in mainwindow option.
 (optionnal)    Display image in mainwindow with overlay of subtracted image for showing where motion occured.

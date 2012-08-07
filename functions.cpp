@@ -82,6 +82,7 @@ bool lensClosed() {
     return state == 'c';
 }
 
+
 //Kernel-power 51 doesnt work. 50 is supposed to compatible -- untested.
 bool validKernel(){
     QString command = "uname -r";
