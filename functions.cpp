@@ -21,16 +21,23 @@ void convertImage(const FCam::Image &image,CImg<unsigned char> &img)
 }
 
 
-void terminalAction(QString command, bool show_output=false)
+QString terminalAction(QString command, bool getoutput=false, bool show_output=false)
 {
     //TODO: Show output
+
+    QString result = "";
     QStringList args;
     args << "-c" << command;
     qp = new QProcess;
     qp->start("/bin/sh", args);
     qp->waitForFinished();
+    if(getoutput)
+    {
+        result = QString(qp->readAll());
+    }
     qp->close();
     qp->terminate();
+    return result;
 }
 
 //replace with phone function in main app
@@ -73,4 +80,11 @@ bool lensClosed() {
     char state = fgetc(ff);   // file contains either "open" or "closed"
     fclose(ff);
     return state == 'c';
+}
+
+//Kernel-power 51 doesnt work. 50 is supposed to compatible -- untested.
+bool validKernel(){
+    QString command = "uname -r";
+    command = terminalAction(command, true);
+    return command.contains("omap1") || !command.contains("51");
 }
