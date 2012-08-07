@@ -43,11 +43,12 @@ void Operations::run(){
         alert("Make sure lens cap is open");
     }
     else{
+        initial();
         save_dir = image_dir;
 
         qDebug() << "Started";
-        //getStaticBGImage();
-        //qDebug() << "Got static";
+        defineGoodExposure();
+//        qDebug() << "Got static";
 
         updateReferenceImage();
         checkMovement(interval_default,limitVal);
@@ -57,13 +58,17 @@ void Operations::run(){
 }
 
 
-Operations::Operations(int exp, float gain){
+Operations::Operations(){
+    initial();
+}
+
+void Operations::initial(){
     willStop = false;
     // Check compatiblity
     errorCheck();
     // Set the shot parameters
-    stream1.exposure = exp;
-    stream1.gain = gain;
+    stream1.exposure = 80000;
+    stream1.gain = 1.0f;
     // Request an image size and allocate storage
     stream1.image = FCam::Image(width, height, FCam::UYVY);
 }
@@ -107,7 +112,7 @@ void Operations::errorCheck() {
 /** Gets a static unchanging frame taken at interval(milliseconds), and exits
   when scene is static for stableframenum number of frames.
   **/
-void Operations::getStaticBGImage(int stableframenum)
+void Operations::defineGoodExposure(int stableframenum)
 {
     int count = 0;
     stream1.frameTime = 0;
@@ -129,6 +134,9 @@ void Operations::getStaticBGImage(int stableframenum)
         autoWhiteBalance(&stream1, frame1);
 
         exposure = frame1.exposure() * frame1.gain();
+
+        qDebug() << "Stable exposure count:" << stableCount;
+
         // Increment stableCount if the exposure is within 5% of the
         // previous one
         if (fabs(exposure - lastExposure) < 0.02f * lastExposure)
@@ -215,6 +223,7 @@ void Operations::checkMovement(int interval, int limit)
             qDebug() << "GOTCHA!";
             record(10,20);             //record 10 images in quick succession.
             updateReferenceImage();
+            alert("Movement!");
 
             //Send Email that logs movement
             if(emailAlert){

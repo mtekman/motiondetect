@@ -30,7 +30,7 @@ public:
 
     //double triggerFract
     //Time is in microseconds *10^-6
-    Operations(int exp=1000000, float gain=1.0f);
+    Operations();
     void finishAndClose();
     //No destructor
 
@@ -44,6 +44,7 @@ protected:
     void run();
 
 private:
+    void initial();
     bool willStop; //bool for stopping safely
     //Camera Variables
     FCam::N900::Sensor sensor1;      //Image Sensor
@@ -51,7 +52,7 @@ private:
     FCam::Frame frame1;              //Frame
 
     void errorCheck();
-    void getStaticBGImage(int stableframenum = 10); //50ms
+    void defineGoodExposure(int stableframenum = 10); //50ms
     //For Debugging:
     void updateReferenceImage();
     void checkMovement(int interval=2000, int limit=23000);

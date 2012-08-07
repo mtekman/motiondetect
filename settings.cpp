@@ -87,7 +87,13 @@ void Settings::on_pushButton_browse_clicked()
     if(openpath=="."){openpath="/home/user/MyDocs/DCIM/MISC";}
     QString path = QFileDialog::getExistingDirectory(this, tr("Folder to save images to"),openpath); // tr("Pictures (*.jpg *.png *.gif);;Video (*.avi *.mpg *.mp4 *.mpeg)"));
     QString dir = QFileInfo(path).absoluteFilePath();
+
+
+    if(!dir.endsWith('/')) dir.append('/');
+
     ui->lineEdit_image_dir->setText(dir);
+
+
 
 }
 
@@ -127,7 +133,7 @@ void Settings::writeSettings(){
     settings.setValue("email_subject", ui->lineEdit_Subject->text());
     settings.setValue("email_message", ui->plainTextEdit_message->toPlainText());
 
-    settings.setValue("image_dir", ui->lineEdit_Address->text());
+    settings.setValue("image_dir", ui->lineEdit_image_dir->text());
     settings.setValue("convert_video", ui->checkBox_convertImages->isChecked());
     settings.setValue("delete_images", ui->checkBox_deleteImages_after_convert->isChecked());
 

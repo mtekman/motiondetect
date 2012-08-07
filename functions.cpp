@@ -8,7 +8,6 @@ using namespace cimg_library;
 //Shared QProcess
 QProcess *qp;
 
-
 //convert address FCam to CImg
 void convertImage(const FCam::Image &image,CImg<unsigned char> &img)
 {
@@ -20,6 +19,7 @@ void convertImage(const FCam::Image &image,CImg<unsigned char> &img)
         }
     }
 }
+
 
 void terminalAction(QString command, bool show_output=false)
 {
@@ -33,6 +33,12 @@ void terminalAction(QString command, bool show_output=false)
     qp->terminate();
 }
 
+//replace with phone function in main app
+void alert(QString text){
+    QString notif = QString("dbus-send --type=method_call --dest=org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications.SystemNoteInfoprint string:%1"+text+"%1").arg(QChar(0x22));
+    terminalAction(notif);
+}
+
 void clearImages(QString &dir)
 {
     QString clear = "rm "+dir+"*.jpg";
@@ -44,6 +50,8 @@ void clearImages(QString &dir)
 
 void convertToMP4(QString &dir, bool clear, QString videoname="movement")
 {
+    alert("Converting to MP4 -- please wait");
+
     if(!dir.endsWith('/'))  dir.append('/');
     if(!videoname.endsWith(".mpg")) videoname.append(".mpg");
 
@@ -55,6 +63,8 @@ void convertToMP4(QString &dir, bool clear, QString videoname="movement")
     qDebug() << "finished converting.";
 
     if(clear) clearImages(dir);
+
+    alert("Finished!");
 }
 
 //Taken from FCamera
@@ -63,10 +73,4 @@ bool lensClosed() {
     char state = fgetc(ff);   // file contains either "open" or "closed"
     fclose(ff);
     return state == 'c';
-}
-
-//replace with phone function in main app
-void alert(QString text){
-    QString notif = QString("dbus-send --type=method_call --dest=org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications.SystemNoteInfoprint string:%1"+text+"%1").arg(QChar(0x22));
-    terminalAction(notif);
 }
