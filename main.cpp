@@ -39,9 +39,13 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
 
+//    QApplication::arguments();
+
     //Custom Handler to output qDebug() to a Log.
 
     //qInstallMsgHandler(handle);
+
+
 
 
     MainWindow mainWindow;
