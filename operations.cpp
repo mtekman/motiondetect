@@ -24,7 +24,7 @@ int norm = 100; //custom normalisation amount
 QString current_save_image; //filename of last movement image -- shared for emailing
 
 
-CImg<unsigned char> average; //Last average
+CImg<unsigned char> reference; //Last reference
 QLabel *imglabel;
 
 // static class variables for saving images with movement
@@ -35,11 +35,12 @@ QString save_dir;
 
 void Operations::run(){
     qDebug() << "Starting";
-    bool closed = false;
-    if(closed = lensClosed()) {
-        qDebug() << closed;
+    if(!validKernel()){
         willStop = true;
-        //finishAndClose();
+        alert("Please boot into a valid kernel. Kernel-Powerv51 does not support FCam");
+    }
+    else if(lensClosed()) {
+        willStop = true;
         alert("Make sure lens cap is open");
     }
     else{
@@ -48,13 +49,13 @@ void Operations::run(){
 
         qDebug() << "Started";
         defineGoodExposure();
-//        qDebug() << "Got static";
+        qDebug() << "Got static";
 
         updateReferenceImage();
         checkMovement(interval_default,limitVal);
         finishAndClose();
     }
-    qDebug() << "Finished.";
+
 }
 
 
@@ -70,6 +71,11 @@ void Operations::initial(){
     stream1.exposure = 80000;
     stream1.gain = 1.0f;
     // Request an image size and allocate storage
+
+    // Enable the histogram unit -- NECESSARY to autoexpose image!
+    stream1.histogram.enabled = true;
+    stream1.histogram.region = FCam::Rect(0, 0, width, height);
+
     stream1.image = FCam::Image(width, height, FCam::UYVY);
 }
 
@@ -78,7 +84,7 @@ void Operations::finishAndClose(){
     sensor1.stop();
     qDebug() << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
     qDebug() << "Final color temperature: " << frame1.whiteBalance() << "K";
-   // Check that the pipeline is empty
+    // Check that the pipeline is empty
     assert(sensor1.framesPending() == 0);
     assert(sensor1.shotsPending() == 0);
 
@@ -88,7 +94,7 @@ void Operations::finishAndClose(){
         //Convert images to movie, bool = delete images
         if(convert_images) convertToMP4(save_dir,delete_images);
     }
-
+    qDebug() << "Finished.";
 }
 
 
@@ -135,7 +141,7 @@ void Operations::defineGoodExposure(int stableframenum)
 
         exposure = frame1.exposure() * frame1.gain();
 
-        qDebug() << "Stable exposure count:" << stableCount;
+        //qDebug() << "Stable exposure count:" << stableCount;
 
         // Increment stableCount if the exposure is within 5% of the
         // previous one
@@ -156,6 +162,8 @@ void Operations::defineGoodExposure(int stableframenum)
         count++;
     } while (stableCount < stableframenum); // Terminate when stable for 10 frames
     //Constant background image obtained, now make greyscale
+    FCam::saveJPEG(frame1.image(), "/home/user/MyDocs/DCIM/Greggg.jpg");
+
 }
 
 void Operations::updateReferenceImage(){
@@ -171,11 +179,12 @@ void Operations::updateReferenceImage(){
     CImg<unsigned char> img(width, height,1);
     convertImage(image, img);
 
-    average = img/norm;
+    reference = img/norm;
+    (reference*norm).save_jpeg("/home/user/MyDocs/DCIM/gerog.jpg");
     qDebug() << "Updated reference image";
 }
 
-/** Subtracts normalized frames from an average frame **/
+/** Subtracts normalized frames from an reference frame **/
 void Operations::checkMovement(int interval, int limit)
 {
     EmailThread *em;
@@ -204,8 +213,8 @@ void Operations::checkMovement(int interval, int limit)
         //2. Confine colorspace to (norm=100) 25 discrete values
         img = img/norm;
 
-        //3. Get subtracted difference between current image and average
-        CImg<unsigned char> sub = (img-average).normalize();    //Normalize to {0,1}
+        //3. Get subtracted difference between current image and reference
+        CImg<unsigned char> sub = (img-reference).normalize();    //Normalize to {0,1}
 
         //4. Count number of white pixels
         int totalN = 0; cimg_forXYZC(sub,x,y,z,c) if(sub(x,y,z,c) > 0) totalN++;
@@ -217,8 +226,16 @@ void Operations::checkMovement(int interval, int limit)
         qDebug() << "Totals: Normal - " << totalN << ", Noise Removal -" << totalE << " count=" << count;
 
 
-        //6. Check for movement -- if so: get new average image
-        if (totalE > limit)
+        if(totalN == 0)
+        {
+            qDebug()  << "Bad Reference";
+            //Bad Reference Image -- run autoExpose, and update ref
+            defineGoodExposure(4);
+            updateReferenceImage();
+        }
+
+        //6. Check for movement -- if so: get new reference image
+        else if (totalE > limit)
         {
             qDebug() << "GOTCHA!";
             record(10,20);             //record 10 images in quick succession.
