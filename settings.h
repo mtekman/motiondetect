@@ -23,8 +23,6 @@ protected:
 
 
 private slots:
-    void on_dial_interval_sliderMoved(int position);
-
     void on_dial_whitepixel_sliderMoved(int position);
 
     void on_pushButton_reset_clicked();
@@ -34,6 +32,12 @@ private slots:
     void on_pushButton_browse_clicked();
 
     void on_dial_size_sliderMoved(int position);
+
+    void on_dial_max_sliderMoved(int position);
+
+    void on_dial_min_sliderMoved(int position);
+
+    void on_horizontalSlider_modifier_sliderMoved(int position);
 
 private:
     bool saved;

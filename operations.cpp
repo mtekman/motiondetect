@@ -48,7 +48,7 @@ void Operations::run(){
         qDebug() << "Got static";
 
         updateReferenceImage();
-        checkMovement(interval_default,limitVal);
+        checkMovement(interval_max*1000, interval_min*1000,interval_mod, limitVal);
         finishAndClose();
     }
 
@@ -179,7 +179,7 @@ void Operations::updateReferenceImage(){
 }
 
 /** Subtracts normalized frames from an reference frame **/
-void Operations::checkMovement(int interval, int limit)
+void Operations::checkMovement(int max, int min, float mod, int limit)
 {
     EmailThread *em;
 
@@ -188,13 +188,13 @@ void Operations::checkMovement(int interval, int limit)
     stream1.frameTime = 0;
     sensor1.stream(stream1);
 
-    qDebug() << "White Pixel Threshold is " << limit;
+    unsigned long current_interval = max;
+    unsigned int consec_no_movement = 0;
 
-    unsigned long current_interval = interval;
+    qDebug() << "White Pixel Threshold is " << limit
+             << "Interval:" << current_interval;
 
     do{
-        QThread::msleep(current_interval);
-
         //1. Grab a valid frame
         frame1 = sensor1.getFrame();
         assert(frame1.shot().id == stream1.id);
@@ -217,7 +217,8 @@ void Operations::checkMovement(int interval, int limit)
         sub = sub.erode(erodeVar).dilate(erodeVar);
         int totalE = 0; cimg_forXYZC(sub,x,y,z,c) if(sub(x,y,z,c) > 0) totalE++;
 
-        qDebug() << "Totals: Normal - " << totalN << ", Noise Removal -" << totalE << " count=" << count;
+        qDebug() << "Totals: Normal - " << totalN << ", Noise Removal -" << totalE << " count=" << count
+                 << "Interval:" << current_interval;
 
         //6. Check for movement -- if so: get new reference image
         if (totalE > limit)
@@ -233,10 +234,29 @@ void Operations::checkMovement(int interval, int limit)
                 qDebug() << "Emailed";
             }
 
-            //reset continuous movement counter
-            current_interval = interval;      //Back to normal tick speed
+           // Move logic -- increase response per movement
+            int new_int = (int)(current_interval*mod);
+            current_interval = (new_int>min)?new_int:min;
+
+            consec_no_movement = 0;
+
+
             qDebug() << "Current interval:" << current_interval;
         }
+        else {
+            if(consec_no_movement ++> 9)
+            {
+                int new_int = (int)(current_interval/mod);
+                current_interval = (new_int>max)?max:new_int;
+
+                consec_no_movement = 0; // reset counter
+            }
+        }
+
+        // Sleep here, so that Email thread has time to finish.
+        // Reduces overhead
+        QThread::msleep(current_interval);
+
     }while(count-- > 0 && !willStop);
 }
 

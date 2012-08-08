@@ -32,11 +32,6 @@ void Settings::closeEvent(QCloseEvent *event){
     event->accept();
 }
 
-void Settings::on_dial_interval_sliderMoved(int position)
-{
-    ui->lineEdit_interval->setText(QString::number( 500+(position)*60) );
-}
-
 void Settings::on_dial_whitepixel_sliderMoved(int position)
 {
     ui->lineEdit_whitepixel->setText(QString::number(position*2));
@@ -46,7 +41,14 @@ void Settings::on_pushButton_reset_clicked()
 {
     //General
     ui->lineEdit_whitepixel->setText("60");
-    ui->lineEdit_interval->setText("2000");
+    ui->lineEdit_max->setText("2");
+    ui->lineEdit_min->setText("1");
+    ui->lineEdit_modifier->setText("0.16");
+
+    on_horizontalSlider_modifier_sliderMoved(80);
+    on_dial_max_sliderMoved(2);
+    on_dial_min_sliderMoved(1);
+
 
     //Email
     ui->checkBox_attach->setChecked(false);
@@ -118,8 +120,6 @@ void Settings::on_dial_size_sliderMoved(int position)
 void Settings::writeSettings(){
     QSettings settings("fcam");
     settings.beginGroup("main");
-    settings.setValue("interval_slider", ui->dial_interval->value());
-    settings.setValue("interval_value", ui->lineEdit_interval->text().toUInt());
 
     settings.setValue("whitepixel_slider", ui->dial_whitepixel->value());
     settings.setValue("whitepix_value", ui->lineEdit_whitepixel->text().toUInt());
@@ -145,6 +145,15 @@ void Settings::writeSettings(){
 
     settings.setValue("tab_number", ui->tabWidget->currentIndex());
 
+    settings.setValue("interval_max", ui->lineEdit_max->text().toInt());
+    settings.setValue("interval_min", ui->lineEdit_min->text().toInt());
+
+    settings.setValue("dial_max", ui->dial_max->value());
+    settings.setValue("dial_min", ui->dial_min->value());
+
+    settings.setValue("slide_modifier", ui->horizontalSlider_modifier->value());
+    settings.setValue("interval_modifier", ui->lineEdit_modifier->text().toFloat());
+
     settings.endGroup();
 
 
@@ -156,11 +165,18 @@ void Settings::readSettings(){
     QSettings settings("fcam");
     settings.beginGroup("main");
 
-    int intslide = settings.value("interval_slider").toInt();
-    ui->dial_interval->setValue(intslide);
-    qDebug() << "IJNTERVAL: " << settings.value("interval_value").toString();
-    QString inter = settings.value("interval_value").toString();
-    ui->lineEdit_interval->setText(inter);
+    int mx = settings.value("dial_max").toInt();
+    ui->dial_max->setValue(mx);
+    on_dial_max_sliderMoved(mx);
+
+    int mn = settings.value("dial_min").toInt();
+    ui->dial_min->setValue(mn);
+    on_dial_min_sliderMoved(mn);
+
+    int mod = settings.value("slide_modifier").toInt();
+    ui->horizontalSlider_modifier->setValue(mod);
+    on_horizontalSlider_modifier_sliderMoved(mod);
+
 
     int whiteslide = settings.value("whitepixel_slider").toInt();
     ui->dial_whitepixel->setValue(whiteslide);
@@ -186,5 +202,57 @@ void Settings::readSettings(){
     ui->tabWidget->setCurrentIndex(settings.value("tab_number").toInt() );
 
     settings.endGroup();
+
+}
+
+//Sliders update each other
+int max=2, min=1;
+
+void Settings::on_dial_max_sliderMoved(int position)
+{
+    min = ui->lineEdit_min->text().toInt();
+    max = int((float)(  ( (-position*position)/(position-134))*0.2+1));
+
+    ui->lineEdit_max->setText(QString::number(max));
+
+    if(max <= min && (max-1)>=1) {
+        ui->dial_min->setValue(position-1);
+        on_dial_min_sliderMoved(position-1);
+        //ui->lineEdit_min->setText(QString::number(calculateDial(max-1,false)) );
+    }
+}
+
+void Settings::on_dial_min_sliderMoved(int position)
+{
+    max = ui->lineEdit_max->text().toInt();
+    min = int((float)(  ( (-position*position)/(position-134))*0.2+1));
+
+    ui->lineEdit_min->setText(QString::number(min));
+
+    if(min > max) {
+        ui->dial_max->setValue(position+1);//ui->dial_min->value()+1);
+        on_dial_max_sliderMoved(position+1);
+        //ui->lineEdit_max->setText(QString::number(calculateDial(min+1,false)));
+    }
+}
+
+void Settings::on_horizontalSlider_modifier_sliderMoved(int position)
+{
+    // Max becomes default if the fraction to divide or multiply = 1
+    if(position == 0) {
+        ui->lineEdit_modifier->setText("0.01");
+    }
+    else if(position >= 99) {
+         ui->dial_min->setDisabled(true);
+         ui->lineEdit_min->setDisabled(true);
+    }
+    else{
+        ui->dial_min->setEnabled(true);
+        ui->lineEdit_min->setEnabled(true);
+    }
+
+    float mod = ((float)(position) )/ ( (float)(100));
+
+    ui->lineEdit_modifier->setText(QString::number(mod));
 
 }

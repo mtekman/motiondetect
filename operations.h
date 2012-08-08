@@ -10,7 +10,9 @@ class Operations : public QThread
 {
 
 public:
-    int interval_default;
+    int interval_min, interval_max;
+    float interval_mod;
+
     int width, height;
 
     int limitVal;
@@ -55,7 +57,7 @@ private:
     //For Debugging:
     void updateReferenceImage();
 
-    void checkMovement(int interval=2000, int limit=200);
+    void checkMovement(int max=2000, int min=1000, float mod=0.8, int limit=200);
 
     void record(int frame_num, int interval=0);
 };
