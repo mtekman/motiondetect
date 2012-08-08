@@ -94,7 +94,7 @@ void MainWindow::on_pushButton_clicked()
 
     op->erodeVar = ui->maskEdit->text().toInt();
 
-    qDebug() << " mask:" << op->erodeVar << " thresh:" << op->limitVal << " interval:" << op->interval_default
+    qDebug() << " mask:" << op->erodeVar << " thresh:" << op->limitVal << " interval_max:" << op->interval_max << "interval_min" << op->interval_min
              << " email:" << op->emailAlert << op->email_message << op->email_address << op->email_subject << op->email_attach
              << " convert:" << op->convert_images << " delete:" << op->delete_images << " width,height" << op->width << op->height
              << "image dir:" << op->image_dir;
@@ -232,7 +232,10 @@ void MainWindow::writeSettings(bool new_ones){
         settings.setValue("height", 240);
 
         settings.setValue("mask_slider", 5);
-        settings.setValue("interval_value", 2000);
+        settings.setValue("interval_max", 3000);
+        settings.setValue("interval_min", 1000);
+        settings.setValue("interval_modifier",0.16);
+
         settings.setValue("whitepix_value", 100);
 
         settings.setValue("email_bool",false);
@@ -272,7 +275,9 @@ void MainWindow::readLastWorkingSettings()
         on_mask_slide_sliderMoved(slide);
 
         op->limitVal = settings.value("whitepix_value").toInt();
-        op->interval_default = settings.value("interval_value").toInt();
+        op->interval_max = settings.value("interval_max").toInt();
+        op->interval_min = settings.value("interval_min").toInt();
+        op->interval_mod = settings.value("interval_modifier").toFloat();
 
         op->emailAlert = settings.value("email_bool").toBool();
         op->email_message = settings.value("email_message").toString();
