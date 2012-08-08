@@ -2,8 +2,6 @@
 #include "ui_mainwindow.h"
 
 #include <QtCore/QCoreApplication>
-#include <QSettings>
-#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -94,10 +92,10 @@ void MainWindow::on_pushButton_clicked()
 
     op->erodeVar = ui->maskEdit->text().toInt();
 
-    qDebug() << " mask:" << op->erodeVar << " thresh:" << op->limitVal << " interval_max:" << op->interval_max << "interval_min" << op->interval_min
-             << " email:" << op->emailAlert << op->email_message << op->email_address << op->email_subject << op->email_attach
-             << " convert:" << op->convert_images << " delete:" << op->delete_images << " width,height" << op->width << op->height
-             << "image dir:" << op->image_dir;
+    std::cout << " mask:" << op->erodeVar << " thresh:" << op->limitVal << " interval_max:" << op->interval_max << "interval_min" << op->interval_min
+             << " email:" << op->emailAlert << op->email_message.toUtf8().data() << op->email_address.toUtf8().data() << op->email_subject.toUtf8().data() << op->email_attach
+             << " convert:" << op->convert_images << " delete:" << op->delete_images << " width,height=(" << op->width << op->height
+             << ") image dir:" << op->image_dir.toUtf8().data() << std::endl;
 
     show_widgets(false);
 
@@ -224,7 +222,7 @@ void MainWindow::writeSettings(bool new_ones){
     }
     else if(new_ones)
     {
-        qDebug() << "writing new settings";
+        std::cout << "writing new settings" << std::endl;
 
         QSettings settings("fcam");
         settings.beginGroup("main");
@@ -305,6 +303,5 @@ void MainWindow::readLastWorkingSettings()
 }
 
 void MainWindow::restoreInterface(){
-    qDebug() << "return interface";
     show_widgets(true);
 }

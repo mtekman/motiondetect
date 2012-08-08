@@ -2,6 +2,7 @@
 #include "CImg.h"
 #include <FCam/FCam.h>
 #include <QProcess>
+#include <iostream>
 
 using namespace cimg_library;
 
@@ -41,7 +42,8 @@ QString terminalAction(QString command, bool getoutput=false, bool show_output=f
 }
 
 //replace with phone function in main app
-void alert(QString text){
+void alert(QString text, bool echo=true){
+    if (echo) std::cout << text.toUtf8().data() << std::endl;
     QString notif = QString("dbus-send --type=method_call --dest=org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications.SystemNoteInfoprint string:%1"+text+"%1").arg(QChar(0x22));
     terminalAction(notif);
 }
@@ -51,7 +53,7 @@ void clearImages(QString &dir)
     QString clear = "rm "+dir+"*.jpg";
     terminalAction(clear);
 
-    qDebug() << "Images cleared from " << dir;
+    std::cout << "Images cleared from " << dir.toUtf8().data() << std::endl;
 }
 
 
@@ -62,16 +64,16 @@ void convertToMP4(QString &dir, bool clear, QString videoname="movement")
     if(!dir.endsWith('/'))  dir.append('/');
     if(!videoname.endsWith(".mpg")) videoname.append(".mpg");
 
-    qDebug() << "Converting " << dir << "*.jpg to " << dir+videoname;
+    std::cout << "Converting " << dir.toUtf8().data() << "*.jpg to " << (dir+videoname).toUtf8().data() << std::endl;
 
     QString convert = "ffmpeg -i "+dir+"%05d.jpg -y "+dir+videoname; //y forces overwrite
     terminalAction(convert, true);
 
-    qDebug() << "finished converting.";
+    std::cout << "Finished converting." << std::endl;
 
     if(clear) clearImages(dir);
 
-    alert("Finished!");
+    alert("Finished!", false);
 }
 
 //Taken from FCamera

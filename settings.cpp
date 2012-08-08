@@ -1,9 +1,9 @@
 #include "settings.h"
 #include "ui_settings.h"
 #include <QFileDialog>
-#include <QDebug>
 #include <QSettings>
 #include <QTabWidget>
+#include <iostream>
 
 Settings::Settings(QWidget *parent) :
     QDialog(parent),
@@ -40,15 +40,21 @@ void Settings::on_dial_whitepixel_sliderMoved(int position)
 void Settings::on_pushButton_reset_clicked()
 {
     //General
-    ui->lineEdit_whitepixel->setText("60");
-    ui->lineEdit_max->setText("2");
-    ui->lineEdit_min->setText("1");
-    ui->lineEdit_modifier->setText("0.16");
+    ui->dial_whitepixel->setValue(40);
+    on_dial_whitepixel_sliderMoved(40);
+    //ui->lineEdit_whitepixel->setText("60");
 
-    on_horizontalSlider_modifier_sliderMoved(80);
-    on_dial_max_sliderMoved(2);
-    on_dial_min_sliderMoved(1);
+    ui->dial_max->setValue(40);
+    on_dial_max_sliderMoved(40);
+    //ui->lineEdit_max->setText("2");
 
+    ui->dial_min->setValue(10);
+    on_dial_min_sliderMoved(10);
+    //ui->lineEdit_min->setText("1");
+
+    ui->horizontalSlider_modifier->setValue(16);
+    on_horizontalSlider_modifier_sliderMoved(16);
+    //ui->lineEdit_modifier->setText("0.16");
 
     //Email
     ui->checkBox_attach->setChecked(false);
@@ -157,7 +163,7 @@ void Settings::writeSettings(){
     settings.endGroup();
 
 
-    qDebug() << "Settings.cpp: settings saved";
+    std::cout << "Settings.cpp: settings saved" << std::endl;
 }
 
 

@@ -4,6 +4,7 @@
 #include <QtGui/QMainWindow>
 #include <QLabel>
 #include <QSettings>
+#include <iostream>
 #include "settings.h"
 #include "operations.h"
 

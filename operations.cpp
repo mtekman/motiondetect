@@ -6,9 +6,7 @@
 #include <assert.h>
 #include <vector>
 #include <string.h>
-#include <QDebug>
 
-#include <FCam/N900.h>
 #include <FCam/Image.h>
 #include <QPicture>
 #include <QLabel>
@@ -34,7 +32,7 @@ QString save_dir;
 
 
 void Operations::run(){
-    qDebug() << "Starting";
+    std::cout << "Starting" << std::endl;
     if(lensClosed()) {
         willStop = true;
         alert("Make sure lens cap is open");
@@ -43,9 +41,9 @@ void Operations::run(){
         initial();
         save_dir = image_dir;
 
-        qDebug() << "Started";
+        std::cout << "Started, " << std::endl;
         defineGoodExposure();
-        qDebug() << "Got static";
+        std::cout << "Got static\n" << std::endl;
 
         updateReferenceImage();
         checkMovement(interval_max*1000, interval_min*1000,interval_mod, limitVal);
@@ -78,8 +76,8 @@ void Operations::initial(){
 void Operations::finishAndClose(){
     // Order the sensor to stop the pipeline and discard any frames still in it.
     sensor1.stop();
-    qDebug() << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
-    qDebug() << "Final color temperature: " << frame1.whiteBalance() << "K";
+    std::cout << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
+    std::cout << "\nFinal color temperature: " << frame1.whiteBalance() << "K" << std::endl;
     // Check that the pipeline is empty
     assert(sensor1.framesPending() == 0);
     assert(sensor1.shotsPending() == 0);
@@ -90,7 +88,7 @@ void Operations::finishAndClose(){
         //Convert images to movie, bool = delete images
         if(convert_images) convertToMP4(save_dir,delete_images);
     }
-    qDebug() << "Finished.";
+    std::cout << "Camera Thread exited\n" << std::endl;
 }
 
 
@@ -99,13 +97,13 @@ void Operations::errorCheck() {
     // Make sure FCam is running properly by looking for DriverError
     FCam::Event e;
     while (FCam::getNextEvent(&e, FCam::Event::Error)) {
-        qDebug() << QString("Error: %1").arg(e.description.c_str());
+        std::cout << "Error: " << e.description << std::endl;
         if (e.data == FCam::Event::DriverMissingError) {
-            qDebug() << "fcam-drivers missing. Please install, then reboot.";
+            std::cout << "fcam-drivers missing. Please install, then reboot." << std::endl;
             exit(1);
         }
         if (e.data == FCam::Event::DriverLockedError) {
-            qDebug() << "Another FCam is running";
+            std::cout << "Another FCam is running" << std::endl;
             exit(1);
         }
     }
@@ -175,15 +173,16 @@ void Operations::updateReferenceImage(){
     convertImage(image, img);
 
     reference = img/norm;
-    qDebug() << "Updated reference image";
+    std::cout << "Updated reference image\n" << std::endl;
 }
 
 /** Subtracts normalized frames from an reference frame **/
 void Operations::checkMovement(int max, int min, float mod, int limit)
 {
-    EmailThread *em;
+    EmailThread *em;                //Shared
+    time_t tim = time(0);           //Updated
 
-    int count = 40;
+    int count = 40;                 //Countdown to 0, then terminate. Debug only.
 
     stream1.frameTime = 0;
     sensor1.stream(stream1);
@@ -191,8 +190,8 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
     unsigned long current_interval = max;
     unsigned int consec_no_movement = 0;
 
-    qDebug() << "White Pixel Threshold is " << limit
-             << "Interval:" << current_interval;
+    std::cout << "White Pixel Threshold is " << limit
+              << " Interval:" << current_interval << std::endl;
 
     do{
         //1. Grab a valid frame
@@ -217,21 +216,21 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
         sub = sub.erode(erodeVar).dilate(erodeVar);
         int totalE = 0; cimg_forXYZC(sub,x,y,z,c) if(sub(x,y,z,c) > 0) totalE++;
 
-        qDebug() << "Totals: Normal - " << totalN << ", Noise Removal -" << totalE << " count=" << count
-                 << "Interval:" << current_interval;
+        std::cout << "\nTotals: Normal - " << totalN << ", Noise Removal -" << totalE << " count=" << count
+                  << "Interval:" << current_interval << std::endl;
 
         //6. Check for movement -- if so: get new reference image
         if (totalE > limit)
         {
-            qDebug() << "GOTCHA!";
+            tim = time(0); // Update time
+            std::cout << " Movement at " << tim << std::endl;
             record(10,20);             //record 10 images in quick succession.
             updateReferenceImage();
-            alert("Movement!");
+            alert("Movement!", false);
 
             //Send Email that logs movement
             if(emailAlert){
                 em = new EmailThread(email_address,email_subject, email_message, email_attach, current_save_image);
-                qDebug() << "Emailed";
             }
 
            // Move logic -- increase response per movement
@@ -241,7 +240,7 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
             consec_no_movement = 0;
 
 
-            qDebug() << "Current interval:" << current_interval;
+            std::cout << "Current interval:" << current_interval << std::endl;
         }
         else {
             if(consec_no_movement ++> 9)
@@ -276,7 +275,7 @@ void Operations::record(int frame_num, int interval)
         current_save_image = save_dir+num+".jpg";
         std::string file = current_save_image.toUtf8().constData();
 
-        qDebug() << "Record:" << current_save_image;
+        std::cout << "Record:" << current_save_image.toUtf8().data() << std::endl;
 
         const FCam::Image &image = frame1.image();
         FCam::saveJPEG(image,file); //saves using FCAM instead of CImg -- faster.

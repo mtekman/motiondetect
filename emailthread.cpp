@@ -1,7 +1,6 @@
 #include "emailthread.h"
 #include <QStringList>
-#include <QProcess>
-#include <QDebug>
+#include <iostream>
 
 EmailThread::EmailThread(const QString &address, const QString &subject, const QString &message, bool attach, const QString &attach_name)
 {
@@ -9,7 +8,7 @@ EmailThread::EmailThread(const QString &address, const QString &subject, const Q
             ((attach)?("-a "+attach_name+" "):(" "))
             +"-s '"+subject+"' "+address;
 
-    qDebug() << email;
+    std::cout << "Emailed: " << email.toUtf8().data() << std::endl;
     QStringList args;
     args << "-c" << email;
     qp = new QProcess;
@@ -20,7 +19,7 @@ EmailThread::EmailThread(const QString &address, const QString &subject, const Q
 EmailThread::~EmailThread()
 {
     qp->terminate();
-    qDebug() << "email sent.";
+    std::cout << "email sent.";
 }
 
 //TODO: Timestamp for image
