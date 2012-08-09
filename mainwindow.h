@@ -38,7 +38,7 @@ public:
 
     void showExpanded();
 
-private slots:
+public slots: //why public? So main.cpp can use them via cmdline
     void restoreInterface();
 
     void on_pushButton_clicked();
@@ -49,6 +49,7 @@ private slots:
 
     void on_pushButton_stop_clicked();
 
+private slots:
     void show_widgets(bool show);
 
 private:

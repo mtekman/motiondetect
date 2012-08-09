@@ -26,7 +26,8 @@ SOURCES += main.cpp mainwindow.cpp \
     settings.cpp \
     emailthread.cpp \
     operations.cpp \
-    functions.cpp
+    functions.cpp \
+    cmdline.cpp
 HEADERS += mainwindow.h \
     settings.h \
     emailthread.h \
