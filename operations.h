@@ -5,10 +5,16 @@
 #include <FCam/Frame.h>
 #include <FCam/N900.h>
 
+#include <QMetaType>
+
+// Make it possible to pass FCam::Frames around in Qt signals
+Q_DECLARE_METATYPE(FCam::Frame)
+Q_DECLARE_METATYPE(FCam::Event)
+
 //multiple inherit
 class Operations : public QThread
 {
-
+    Q_OBJECT
 public:
     int interval_min, interval_max;
     float interval_mod;
@@ -42,6 +48,10 @@ public slots:
         willStop = true;
         sensor1.stopStreaming();
     }
+
+signals:
+    //new movement Image has been taken
+    void newImage();//void newImage(const FCam::Image &);
 
 protected:
     void run();

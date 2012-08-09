@@ -163,8 +163,6 @@ void Operations::defineGoodExposure(int stableframenum)
         // Update lastExposure
         lastExposure = exposure;
         count++;
-        std::cout << "while: stableCount < stableFrame ("
-                  << stableCount << " < " << stableframenum << ")" << std::endl;
     } while (stableCount < stableframenum); // Terminate when stable for 10 frames
     //Constant background image obtained, now make greyscale
 
@@ -178,12 +176,13 @@ void Operations::updateReferenceImage(){
     //Adapt brightness
     defineGoodExposure(4);
 
-
     frame1 = sensor1.getFrame(); //grab first frame
     assert(frame1.shot().id == stream1.id); // check source matches.
 
     //Convert from FCAM to CIMG add channels to accumulator
     const FCam::Image &image = frame1.image();
+    emit newImage();//emit newImage(image);
+
     CImg<unsigned char> img(width, height,1);
     convertImage(image, img);
 
@@ -202,11 +201,10 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
     stream1.frameTime = 0;
     sensor1.stream(stream1);
 
-    unsigned long current_interval = max;
+    unsigned int current_interval = max/2; //halved so that it can grow
     unsigned int consec_no_movement = 0;
 
-    std::cout << "White Pixel Threshold is " << limit
-              << " Interval:" << current_interval << std::endl;
+    std::cout << "White Pixel Threshold is " << limit << std::endl;
 
     do{
         //1. Grab a valid frame
@@ -253,9 +251,6 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
             current_interval = (new_int>min)?new_int:min;
 
             consec_no_movement = 0;
-
-
-            std::cout << "Current interval:" << current_interval << std::endl;
         }
         else {
             if(consec_no_movement ++> 9)
