@@ -23,13 +23,10 @@ QString current_save_image; //filename of last movement image -- shared for emai
 
 
 CImg<unsigned char> reference; //Last reference
-QLabel *imglabel;
 
 // static class variables for saving images with movement
 int image_count = 0;
 QString save_dir;
-
-
 
 void Operations::run(){
     std::cout << "range=(" << interval_min << "," << interval_max << ") mod="<< interval_mod<< " white="<< limitVal
@@ -181,7 +178,7 @@ void Operations::updateReferenceImage(){
 
     //Convert from FCAM to CIMG add channels to accumulator
     const FCam::Image &image = frame1.image();
-    emit newImage();//emit newImage(image);
+    emit newImage(image);//emit newImage(image);
 
     CImg<unsigned char> img(width, height,1);
     convertImage(image, img);
@@ -253,7 +250,7 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
             consec_no_movement = 0;
         }
         else {
-            if(consec_no_movement ++> 9)
+            if(consec_no_movement ++> 8)
             {
                 int new_int = (int)(current_interval/mod);
                 current_interval = (new_int>max)?max:new_int;
