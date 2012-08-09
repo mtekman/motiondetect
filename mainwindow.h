@@ -52,6 +52,7 @@ public slots: //why public? So main.cpp can use them via cmdline
     void on_pushButton_stop_clicked();
 
     void closeAndExit();
+    void jubilate();
 
 private slots:
     void show_widgets(bool show);

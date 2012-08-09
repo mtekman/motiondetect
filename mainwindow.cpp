@@ -18,6 +18,9 @@ MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
     connect(op, SIGNAL(finished()), this, SLOT(restoreInterface()));  //returns interfacr to normal on close
 
     if(commands == 0){ //Not assigned
+
+        connect(op, SIGNAL(newImage()), this, SLOT(jubilate()) );
+
         readLastWorkingSettings();
         width = op->width;
         ui->pushButton_stop->hide();
@@ -334,4 +337,8 @@ void MainWindow::readLastWorkingSettings()
 
 void MainWindow::restoreInterface(){
     show_widgets(true);
+}
+
+void MainWindow::jubilate(){
+    cout << "IMAGE GOTTEN YEEEAAAH" << endl;
 }
