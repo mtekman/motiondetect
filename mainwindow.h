@@ -7,6 +7,7 @@
 #include <iostream>
 #include "settings.h"
 #include "operations.h"
+#include "commandline.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,7 +29,8 @@ public:
         ScreenOrientationAuto
     };
 
-    explicit MainWindow(QWidget *parent = 0);
+    //commands needs to be a pointer, since cannot initialise references
+    explicit MainWindow(CommandLine *commands = 0,QWidget *parent = 0);
     virtual ~MainWindow();
 
     QLabel *img;
@@ -48,6 +50,8 @@ public slots: //why public? So main.cpp can use them via cmdline
     void on_pushButton_settings_clicked();
 
     void on_pushButton_stop_clicked();
+
+    void closeAndExit();
 
 private slots:
     void show_widgets(bool show);

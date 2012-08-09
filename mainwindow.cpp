@@ -3,7 +3,7 @@
 
 #include <QtCore/QCoreApplication>
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
 #ifdef Q_WS_MAEMO_5
@@ -11,24 +11,58 @@ MainWindow::MainWindow(QWidget *parent)
     this->setWindowFlags(Qt::Window);
 #endif
     ui->setupUi(this);
-    ui->pushButton_stop->hide();
-    ui->label_mask_hint->hide();
 
-    //Share ImageLabel -- so that Operations can access it.
-    img = ui->imageLab;
-    ui->label_mask_hint->show();
-
-    //initialise camerathread here. PRevent pointer problems with settings.
+    //initialise camerathread here. Prevents pointer problems with settings.
     op = new Operations;
 
     connect(op, SIGNAL(finished()), this, SLOT(restoreInterface()));  //returns interfacr to normal on close
 
-    readLastWorkingSettings();
-    width = op->width;
+    if(commands == 0){ //Not assigned
+        readLastWorkingSettings();
+        width = op->width;
+        ui->pushButton_stop->hide();
+        ui->label_mask_hint->hide();
+
+        //Share ImageLabel -- so that Operations can access it.
+        img = ui->imageLab;
+        ui->label_mask_hint->show();
+    }
+    else{ //Perform commandLineOps
+
+        connect(op,SIGNAL(finished()), this, SLOT(close()));
+
+        op->limitVal = commands->white;
+        op->interval_max = commands->max;
+        op->interval_min = commands->min;
+        op->interval_mod = commands->mod;
+
+        op->emailAlert = commands->email;
+        op->email_message = commands->message;
+        op->email_address = commands->address;
+        op->email_subject = commands->subject;
+        op->email_attach = commands->attach;
+
+        op->convert_images = commands->convert;
+        op->delete_images = commands->del;
+
+        op->width = commands->width;
+        op->height = commands->height;
+
+        op->image_dir = commands->dir;
+
+        op->erodeVar = commands->mask;
+
+        op->start();
+    }
 }
 
 MainWindow::~MainWindow()
 {
+    delete ui;
+}
+
+void MainWindow::closeAndExit(){
+    this->close();
     delete ui;
 }
 
@@ -91,11 +125,6 @@ void MainWindow::on_pushButton_clicked()
     readLastWorkingSettings();
 
     op->erodeVar = ui->maskEdit->text().toInt();
-
-    std::cout << " mask:" << op->erodeVar << " thresh:" << op->limitVal << " interval_max:" << op->interval_max << "interval_min" << op->interval_min
-             << " email:" << op->emailAlert << op->email_message.toUtf8().data() << op->email_address.toUtf8().data() << op->email_subject.toUtf8().data() << op->email_attach
-             << " convert:" << op->convert_images << " delete:" << op->delete_images << " width,height=(" << op->width << op->height
-             << ") image dir:" << op->image_dir.toUtf8().data() << std::endl;
 
     show_widgets(false);
 

@@ -32,7 +32,18 @@ QString save_dir;
 
 
 void Operations::run(){
-    std::cout << "Starting" << std::endl;
+    std::cout << "range=(" << interval_min << "," << interval_max << ") mod="<< interval_mod<< " white="<< limitVal
+         << " size=("<< width <<","<< height
+         << ") Mask=" << erodeVar
+         <<" convert="<< convert_images <<" delete="<< delete_images
+        << " dir=" << image_dir.toUtf8().data()
+        << "\nEmail:" << emailAlert << " " << email_address.toUtf8().data()
+        << " " << email_message.toUtf8().data() << " "
+        <<email_subject.toUtf8().data() << " "<<email_attach << std::endl;
+
+
+    std::cout << "CameraThread: Started" << std::endl;
+
     if(lensClosed()) {
         willStop = true;
         alert("Make sure lens cap is open");
@@ -41,7 +52,7 @@ void Operations::run(){
         initial();
         save_dir = image_dir;
 
-        std::cout << "Started, " << std::endl;
+        std::cout << "Getting exposure" << std::endl;
         defineGoodExposure();
         std::cout << "Got static\n" << std::endl;
 
@@ -115,6 +126,7 @@ void Operations::errorCheck() {
 void Operations::defineGoodExposure(int stableframenum)
 {
     int count = 0;
+
     stream1.frameTime = 0;
     // We will stream until the exposure stabilizes
     int stableCount = 0;    // # of consecutive frames with stable exposure
@@ -150,6 +162,8 @@ void Operations::defineGoodExposure(int stableframenum)
         // Update lastExposure
         lastExposure = exposure;
         count++;
+        std::cout << "while: stableCount < stableFrame ("
+                  << stableCount << " < " << stableframenum << ")" << std::endl;
     } while (stableCount < stableframenum); // Terminate when stable for 10 frames
     //Constant background image obtained, now make greyscale
 

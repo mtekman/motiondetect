@@ -27,12 +27,13 @@ SOURCES += main.cpp mainwindow.cpp \
     emailthread.cpp \
     operations.cpp \
     functions.cpp \
-    cmdline.cpp
+    commandline.cpp
 HEADERS += mainwindow.h \
     settings.h \
     emailthread.h \
     operations.h \
-    CImg.h
+    CImg.h \
+    commandline.h
 FORMS += mainwindow.ui \
     noticebox.ui \
     settings.ui
