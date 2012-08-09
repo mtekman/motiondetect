@@ -28,14 +28,17 @@ CommandLine::CommandLine(QStringList &arguments){
     //Echo out commands not understood
     unknowns(); //Halt here for unknowns variables
 
-    cout << "range=(" << min << "," << max << ") mod="<< mod<< " white="<< white << " size=("<< width <<","<< height
-         <<") Show=" << show << " Mask=" << mask
-         <<" convert="<< convert <<" delete="<< del << " dir=" << dir.toUtf8().data()
-        << "\nEmail:" << email << " " << address.toUtf8().data() << " " << message.toUtf8().data() << " "<<subject.toUtf8().data() << " "<<attach << endl;
+//    cout << "range=(" << min << "," << max << ") mod="<< mod<< " white="<< white << " size=("<< width <<","<< height
+//         <<") Show=" << show << " Mask=" << mask
+//         <<" convert="<< convert <<" delete="<< del << " dir=" << dir.toUtf8().data()
+//        << "\nEmail:" << email << " " << address.toUtf8().data() << " " << message.toUtf8().data() << " "<<subject.toUtf8().data() << " "<<attach << endl;
+
 }
 
+CommandLine::~CommandLine(){}
+
 void CommandLine::checkMask(){
-    int m_index = 0; mask = 3; //default
+    int m_index = 0; mask = 5; //default
     if( (m_index=args.indexOf("--mask"))!=-1)
     {
         mask = args.at(m_index+1).toInt();

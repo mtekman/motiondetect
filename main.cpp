@@ -17,8 +17,7 @@ int main(int argc, char *argv[])
         CommandLine *cmd = new CommandLine(arguments);
         mw = new MainWindow(cmd);
         show = cmd->show;
-        //delete cmd;
-        exit(1);
+        delete cmd;
     }
     else{
         mw = new MainWindow;

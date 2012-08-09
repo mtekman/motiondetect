@@ -11,6 +11,7 @@ class CommandLine
 {
 public:
     CommandLine(QStringList &arguments);
+    ~CommandLine();
 
     QStringList args;
 

@@ -34,6 +34,8 @@ public:
     Operations();
     void finishAndClose();
     //No destructor
+    void initial();
+
 
 public slots:
     void stop(){
@@ -45,7 +47,6 @@ protected:
     void run();
 
 private:
-    void initial();
     bool willStop; //bool for stopping safely
     //Camera Variables
     FCam::N900::Sensor sensor1;      //Image Sensor

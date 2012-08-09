@@ -53,6 +53,7 @@ void Operations::run(){
         save_dir = image_dir;
 
         std::cout << "Getting exposure" << std::endl;
+        QThread::sleep(2);
         defineGoodExposure();
         std::cout << "Got static\n" << std::endl;
 
@@ -230,8 +231,8 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
         sub = sub.erode(erodeVar).dilate(erodeVar);
         int totalE = 0; cimg_forXYZC(sub,x,y,z,c) if(sub(x,y,z,c) > 0) totalE++;
 
-        std::cout << "\nTotals: Normal - " << totalN << ", Noise Removal -" << totalE << " count=" << count
-                  << "Interval:" << current_interval << std::endl;
+        std::cout << "Totals: Normal - " << totalN << ", Noise Removal -" << totalE << " count=" << count
+                  << " Interval:" << current_interval << std::endl;
 
         //6. Check for movement -- if so: get new reference image
         if (totalE > limit)

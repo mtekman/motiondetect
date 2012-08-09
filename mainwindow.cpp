@@ -29,7 +29,7 @@ MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
     }
     else{ //Perform commandLineOps
 
-        connect(op,SIGNAL(finished()), this, SLOT(close()));
+        connect(op,SIGNAL(finished()), this, SLOT(closeAndExit()));
 
         op->limitVal = commands->white;
         op->interval_max = commands->max;
@@ -52,6 +52,7 @@ MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
 
         op->erodeVar = commands->mask;
 
+        op->initial();
         op->start();
     }
 }
