@@ -21,7 +21,6 @@ void convertImage(const FCam::Image &image,CImg<unsigned char> &img)
     }
 }
 
-
 QString terminalAction(QString command, bool getoutput=false, bool show_output=false)
 {
     //TODO: Show output
