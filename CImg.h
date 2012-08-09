@@ -4495,8 +4495,8 @@ namespace cimg_library_suffixed {
       return m?(x?1:0):0;
     }
     inline int mod(const char x, const char m) {
-      //return x>=0?x%m:(x%m?m+x%m:0);
-        return true;
+      return x>=0?x%m:(x%m?m+x%m:0);
+        //return true;
     }
     inline int mod(const short x, const short m) {
       return x>=0?x%m:(x%m?m+x%m:0);
