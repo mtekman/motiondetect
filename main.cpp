@@ -8,6 +8,9 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
 
+    //Enables passing Images as signals
+    qRegisterMetaType<FCam::Image>("FCam::Image");
+
     QStringList arguments = QApplication::arguments();
 
     MainWindow *mw; bool show = true;
@@ -23,8 +26,6 @@ int main(int argc, char *argv[])
         mw = new MainWindow;
     }
 
-    std::cout << "Application launched" << std::endl;
-
     if(show){
         mw->setOrientation(MainWindow::ScreenOrientationLockLandscape);
         mw->showExpanded();
@@ -32,7 +33,5 @@ int main(int argc, char *argv[])
 
 
     return app.exec();
-    std::cout << "Application Exited - " << std::endl;
-
 }
 

@@ -21,7 +21,6 @@ public:
     int white;
 
     int width,height;
-
     bool convert, del;
 
     QString dir;
