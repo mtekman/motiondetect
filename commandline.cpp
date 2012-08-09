@@ -16,8 +16,6 @@ CommandLine::CommandLine(QStringList &arguments){
     checkWhitepix();
     //size
     checkSize();
-    //hidden mode (background)
-    isVisible();
     //convert/delete
     checkConvertDelete();
     //save image directory
@@ -39,11 +37,12 @@ CommandLine::~CommandLine(){}
 
 void CommandLine::checkMask(){
     int m_index = 0; mask = 5; //default
-    if( (m_index=args.indexOf("--mask"))!=-1)
+    if( ((m_index=args.indexOf("--mask"))!=-1) || ((m_index=args.indexOf("-m"))!=-1) )
     {
         mask = args.at(m_index+1).toInt();
-        if(mask == 0){
-            cout << "Invalid Mask Size" << endl;
+        if(mask < 2){
+            cerr << "Invalid Mask Size" << endl;
+            exit(1);
         }
     }
 }
@@ -51,6 +50,13 @@ void CommandLine::checkMask(){
 
 void CommandLine::checkEmail()
 {
+    //Defaults:
+    email = false;
+    address = "blank@blank.com";
+    message = "Hello";
+    subject = "Motion Detected";
+    attach = false;
+
     int email_index = 0;
     if( (email_index=args.indexOf("-e"))!=-1 ||
         (email_index=args.indexOf("--email"))!=-1 ){
@@ -62,7 +68,7 @@ void CommandLine::checkEmail()
         while( (++index < args.length()-1) && (args.at(index).at(0)!='-')){/*count*/}
 
         cout << "Args #:" << (index - email_index) << endl;
-        if ((index - email_index)!=5){
+        if ((index - email_index)!=4){
             cerr << "email format is: -e <address> <message> <subject> <Y/N>" << endl;
             exit(1);
         }
@@ -80,13 +86,6 @@ void CommandLine::checkEmail()
         args.removeAt(email_index+2); args.removeAt(email_index+1);
         args.removeAt(email_index);
     }
-    else{ //flag not given
-        email = false;
-        address = "blank@blank.com";
-        message = "Hello";
-        subject = "Motion Detected";
-        attach = false;
-    }
 }
 
 void CommandLine::checkImageDir()
@@ -95,18 +94,19 @@ void CommandLine::checkImageDir()
     dir = "/home/user/MyDocs/DCIM/MISC/"; //default
     if ( (i_i=args.indexOf("-i"))!=-1 || (i_i=args.indexOf("--images"))!=-1) {
         dir = args.at(i_i+1);
-        if(dir.at(0)=='/'){
+        if(dir.at(0)!='/'){
             cerr << "Please use absolute paths" << endl;
             exit(1);
         }
-        args.removeAt(i_i);
+        args.removeAt(i_i+1); args.removeAt(i_i);
     }
 }
 
 void CommandLine::checkConvertDelete()
 {
-    if(del=(args.contains("--delete")) || (args.contains("-d")) ){
-        if (!(convert= (args.contains("--convert")) || (args.contains("-c")) ))
+    del = convert = false; //default
+    if(del=  ((args.contains("--delete")) || (args.contains("-d")) ) ){
+        if (convert= !( (args.contains("--convert")) || (args.contains("-c")) ) )
         {
             cerr << "Why delete images you wont convert? Delete images after you convert them first." << endl;
             exit(1);
@@ -114,17 +114,9 @@ void CommandLine::checkConvertDelete()
     }
 }
 
-void CommandLine::isVisible(){
-    int q_i=0;
-    if( (q_i=args.indexOf("--quiet"))!=-1 || (q_i=args.indexOf("-q"))!=-1 )
-    {
-        args.removeAt(q_i);
-    }
-    show = (q_i==-1);
-}
-
 void CommandLine::checkSize()
 {
+    width =320; height = 240; //defaults
     int s_i = 0;
     if ( (s_i=args.indexOf("-s"))!=-1 || (s_i=args.indexOf("--size"))!=-1){
         width= args.at(s_i+1).toInt();
@@ -145,9 +137,6 @@ void CommandLine::checkSize()
         }// height can be ignored
         args.removeAt(s_i+2);args.removeAt(s_i+1);args.removeAt(s_i);
     }
-    else{ //size not given
-        width = 320; height = 240;
-    }
 }
 
 void CommandLine::checkWhitepix()
@@ -156,9 +145,7 @@ void CommandLine::checkWhitepix()
     white = 100; //default
     if((w_index =args.indexOf("--whitepix"))!=-1 || (w_index =args.indexOf("-w"))!=-1 )
     {
-        //cout << "WHITE:" << args.at(w_index).toUtf8().data() << " " << args.at(w_index+1).toUtf8().data() << endl;
         white = args.at(w_index+1).toInt();
-
 
         if(white==0 || white > 5000){
             cerr << "White needs to be a valid integer" << endl;
@@ -171,6 +158,7 @@ void CommandLine::checkWhitepix()
 
 void CommandLine::checkRange()
 {
+    min = 1; max= 10;       //defaults
     int r_index = 0;
     if( (r_index=args.indexOf("-r"))!=-1 ||
             (r_index=args.indexOf("--range"))!=-1){
@@ -184,15 +172,16 @@ void CommandLine::checkRange()
         }
         min = val1.toInt();
         max = val2.toInt();
+        if(min == 0 || max == 0){
+            cerr << "Invalid range " << endl;
+            exit(1);
+        }
         if(min > max){
             cerr << "min " << min <<" is greater than max " << max << "\nPlease fix." << endl;
             exit(1);
         }
         //remove from args if used
         args.removeAt(r_index+2); args.removeAt(r_index+1); args.removeAt(r_index);
-    }
-    else{ //not given
-        min = 1; max= 10;
     }
 }
 
@@ -222,7 +211,6 @@ void CommandLine::checkVersionOrHelp(){
         cout << "usage: motiondetect [OPTION...]\n"
               "  -h, --help\t\t* Print this help\n"
               "  -v, --version\t\t* Display version\n"
-              "  -q, --quiet\t\t* Run app invisibly\n"
               "  -m, --mask INT\t\t* Size of mask in square pixels\n"
               "  -i, --images DIRECTORY \t* Where images are saved.\n\t\t\t\t  Default:/home/user/MyDocs/DCIM/MISC/\n"
               "  -c, --convert\t\t* Converts movement images to an\n\t\t\t\t  MPG file in te image directory\n"
@@ -239,12 +227,12 @@ void CommandLine::checkVersionOrHelp(){
 
 void CommandLine::unknowns(){
     if(args.length()!=0){
-        cout << "Could not parse: ";
+        cerr << "Could not parse: ";
         for(int i=0; i< args.length(); i++){
-            cout << args.at(i).toUtf8().data() << " ";
+            cerr << args.at(i).toUtf8().data() << " ";
         }
-        cout << endl;
-        cout << "Please try --help for more info " << endl;
+        cerr << endl;
+        cerr << "Please try --help for more info " << endl;
         exit(1);
     }
 }

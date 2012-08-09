@@ -22,7 +22,6 @@ public:
 
     int width,height;
 
-    bool show;
     bool convert, del;
 
     QString dir;
@@ -37,7 +36,6 @@ private:
   void checkModifier();
   void checkWhitepix();
   void checkSize();
-  void isVisible();
   void checkConvertDelete();
   void checkImageDir();
   void checkEmail();
