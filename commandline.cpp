@@ -1,80 +1,52 @@
-#include <QString>
-#include <QStringList>
-#include <iostream>
+#include "commandline.h"
 
-using namespace std;
-
-
-class cmdLine {
-  public:
-    cmdLine(QStringList &arguments);
-
-    QStringList args;
-
-    int min,max;
-
-    float mod;
-    int white_pix;
-
-    int width,height;
-
-    bool show;
-    bool convert, del;
-
-    QString dir;
-
-    bool email,attach;
-    QString address, message, subject;
-
-  private:
-    void checkVersionOrHelp();
-    void checkRange(int &min_value, int &max_value);
-    float checkModifier();
-    int checkWhitepix();
-    void checkSize(int &width_value, int &height_value);
-    bool isVisible();
-    void checkConvertDelete(bool &convert_val, bool &del_val);
-    QString checkImageDir();
-    void checkEmail(bool &email_val, QString &address_val , QString &message_val ,
-               QString &subject_val, bool &attach_val);
-    void reject();
-};
-
-
-cmdLine::cmdLine(QStringList &arguments){
+CommandLine::CommandLine(QStringList &arguments){
     args = arguments;
     args.removeFirst(); //gets rid of app name from list for faster searching
 
     //Check version and help tags first
     checkVersionOrHelp();
+    // mask
+    checkMask();
     //interval range
-    checkRange(min,max);
+    checkRange();
     //modifier
-    mod = checkModifier();
+    checkModifier();
     //whitepixel count
-    white_pix = checkWhitepix();
+    checkWhitepix();
     //size
-    checkSize(width, height);
+    checkSize();
     //hidden mode (background)
-    show = isVisible();
+    isVisible();
     //convert/delete
-    checkConvertDelete(convert,del);
+    checkConvertDelete();
     //save image directory
-    dir = checkImageDir();
+    checkImageDir();
     //Email
-    checkEmail(email,address,message,subject,attach);
+    checkEmail();
 
     //Echo out commands not understood
-    reject(); //Halt here for unknowns variables
+    unknowns(); //Halt here for unknowns variables
 
-    cout << "range=(" << min << "," << max << ") mod="<< mod<< " white="<< white_pix << " size=("<< width <<","<< height
-         <<") Show=" << show
+    cout << "range=(" << min << "," << max << ") mod="<< mod<< " white="<< white << " size=("<< width <<","<< height
+         <<") Show=" << show << " Mask=" << mask
          <<" convert="<< convert <<" delete="<< del << " dir=" << dir.toUtf8().data()
         << "\nEmail:" << email << " " << address.toUtf8().data() << " " << message.toUtf8().data() << " "<<subject.toUtf8().data() << " "<<attach << endl;
 }
 
+void CommandLine::checkMask(){
+    int m_index = 0; mask = 3; //default
+    if( (m_index=args.indexOf("--mask"))!=-1)
+    {
+        mask = args.at(m_index+1).toInt();
+        if(mask == 0){
+            cout << "Invalid Mask Size" << endl;
+        }
+    }
+}
 
-void cmdLine::checkEmail(bool &email, QString &address, QString &message, QString &subject, bool &attach)
+
+void CommandLine::checkEmail()
 {
     int email_index = 0;
     if( (email_index=args.indexOf("-e"))!=-1 ||
@@ -114,10 +86,10 @@ void cmdLine::checkEmail(bool &email, QString &address, QString &message, QStrin
     }
 }
 
-QString cmdLine::checkImageDir()
+void CommandLine::checkImageDir()
 {
     int i_i =0;
-    QString dir = "/home/user/MyDocs/DCIM/MISC/"; //default
+    dir = "/home/user/MyDocs/DCIM/MISC/"; //default
     if ( (i_i=args.indexOf("-i"))!=-1 || (i_i=args.indexOf("--images"))!=-1) {
         dir = args.at(i_i+1);
         if(dir.at(0)=='/'){
@@ -126,10 +98,9 @@ QString cmdLine::checkImageDir()
         }
         args.removeAt(i_i);
     }
-    return dir;
 }
 
-void cmdLine::checkConvertDelete(bool &convert, bool &del)
+void CommandLine::checkConvertDelete()
 {
     if(del=(args.contains("--delete")) || (args.contains("-d")) ){
         if (!(convert= (args.contains("--convert")) || (args.contains("-c")) ))
@@ -140,23 +111,23 @@ void cmdLine::checkConvertDelete(bool &convert, bool &del)
     }
 }
 
-bool cmdLine::isVisible(){
+void CommandLine::isVisible(){
     int q_i=0;
     if( (q_i=args.indexOf("--quiet"))!=-1 || (q_i=args.indexOf("-q"))!=-1 )
     {
         args.removeAt(q_i);
     }
-    return q_i==0;
+    show = (q_i==-1);
 }
 
-void cmdLine::checkSize(int &width, int &height)
+void CommandLine::checkSize()
 {
     int s_i = 0;
     if ( (s_i=args.indexOf("-s"))!=-1 || (s_i=args.indexOf("--size"))!=-1){
         width= args.at(s_i+1).toInt();
         //check height exists too ( though not needed)
-        if(args.at(s_i+2).at(0)=='-'){
-            cout << "usage: -s width height" << endl;
+        if( s_i+2 >= args.length() ||  args.at(s_i+2).at(0)=='-' ){
+            cerr << "usage: -s width height" << endl;
             exit(1);
         }
 
@@ -176,23 +147,26 @@ void cmdLine::checkSize(int &width, int &height)
     }
 }
 
-int cmdLine::checkWhitepix()
+void CommandLine::checkWhitepix()
 {
-    int w_index = 0, white = 100; //default
+    int w_index = 0;
+    white = 100; //default
     if((w_index =args.indexOf("--whitepix"))!=-1 || (w_index =args.indexOf("-w"))!=-1 )
     {
+        //cout << "WHITE:" << args.at(w_index).toUtf8().data() << " " << args.at(w_index+1).toUtf8().data() << endl;
         white = args.at(w_index+1).toInt();
-        if(white==0){
+
+
+        if(white==0 || white > 5000){
             cerr << "White needs to be a valid integer" << endl;
             exit(1);
         }
         args.removeAt(w_index+1);args.removeAt(w_index);
     }
-    return white;
 }
 
 
-void cmdLine::checkRange(int &min, int&max)
+void CommandLine::checkRange()
 {
     int r_index = 0;
     if( (r_index=args.indexOf("-r"))!=-1 ||
@@ -219,8 +193,8 @@ void cmdLine::checkRange(int &min, int&max)
     }
 }
 
-float cmdLine::checkModifier(){
-    float mod = 0.16; //default
+void CommandLine::checkModifier(){
+    mod = 0.16; //default
     int m_index=0;
     if( (m_index=args.indexOf("-m"))!=-1 ||
             (m_index=args.indexOf("--modifier"))!=-1){
@@ -232,10 +206,9 @@ float cmdLine::checkModifier(){
         //remove from args if used
         args.removeAt(m_index+1); args.removeAt(m_index);
     }
-    return mod;
 }
 
-void cmdLine::checkVersionOrHelp(){
+void CommandLine::checkVersionOrHelp(){
     if(args.contains("-v") || args.contains("--version"))
     {
         cout << "Version 0.9.2" << endl;
@@ -244,23 +217,24 @@ void cmdLine::checkVersionOrHelp(){
     if(args.contains("-h") || args.contains("--help"))
     {
         cout << "usage: motiondetect [OPTION...]\n"
-              "\t-h, --help\t\tPrint this help\n"
-              "\t-v, --version\t\tDisplay version\n"
-              "\t-q, --quiet\t\tRun app invisibly\n"
-              "\t-i, --images DIRECTORY \tWhere images are saved. Default:/home/user/MyDocs/DCIM/MISC/\n"
-              "\t-c, --convert\t\tConverts movement images to an mpg file in te image directory\n"
-              "\t-d, --delete\t\tDeletes images on app exit. Useful only if convert flag specified too\n"
-              "\t-s, --size WIDTH HEIGHT\tValid sizes are: 320 240, 640 480, 800 600, 1280 960\n"
-              "\t-w, --whitepix INT\t\tThreshold for detecting white pixels in eroded images. Default is 100.\n"
-              "\t-r, --range MIN MAX\t\tIntervals in seconds that camera varies between.\n"
-              "\t-m, --modifier FLOAT\tDetermines adaptiveness of camera interval. 0.1 v.responsive --> 1.0 constant.\n"
-              "\t-e, --email ADDRESS MESSAGE SUBJECT [Y/N]\tEmail upon movement. Y attaches the last image to email. N Doesnt.\n"
+              "  -h, --help\t\t* Print this help\n"
+              "  -v, --version\t\t* Display version\n"
+              "  -q, --quiet\t\t* Run app invisibly\n"
+              "  -m, --mask INT\t\t* Size of mask in square pixels\n"
+              "  -i, --images DIRECTORY \t* Where images are saved.\n\t\t\t\t  Default:/home/user/MyDocs/DCIM/MISC/\n"
+              "  -c, --convert\t\t* Converts movement images to an\n\t\t\t\t  MPG file in te image directory\n"
+              "  -d, --delete\t\t* Deletes images on app exit. \n\t\t\t\t  Useful only if convert flag specified too\n"
+              "  -s, --size WIDTH HEIGHT\t* Valid sizes are: 320 240,\n\t\t\t\t  640 480, 800 600, 1280 960\n"
+              "  -w, --whitepix INT\t* Threshold for detecting\n\t\t\t  white pixels in eroded images. Default is 100.\n"
+              "  -r, --range MIN MAX\t* Intervals in seconds that\n\t\t\t  camera varies between.\n"
+              "  -m, --modifier FLOAT\t* Determines adaptiveness of\n\t\t\t  camera interval. 0.1 v.responsive --> 1.0 constant.\n"
+              "  -e, --email ADDRESS MESSAGE SUBJECT [Y/N]\n\t* Email upon movement. Y attaches the last image to email.\n"
         << endl;
         exit(1);
     }
 }
 
-void cmdLine::reject(){
+void CommandLine::unknowns(){
     if(args.length()!=0){
         cout << "Could not parse: ";
         for(int i=0; i< args.length(); i++){
