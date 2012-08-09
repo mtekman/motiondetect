@@ -10,13 +10,13 @@ int main(int argc, char *argv[])
 
     QStringList arguments = QApplication::arguments();
 
-    MainWindow *mw; bool show = false;
+    MainWindow *mw; bool show = true;
 
     if(arguments.length()!=1) //1 is app name
     {
         CommandLine *cmd = new CommandLine(arguments);
         mw = new MainWindow(cmd);
-        show = cmd->show;
+        show = false;
         delete cmd;
     }
     else{
