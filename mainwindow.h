@@ -52,7 +52,8 @@ public slots: //why public? So main.cpp can use them via cmdline
     void on_pushButton_stop_clicked();
 
     void closeAndExit();
-    void jubilate();
+    void newImage(const FCam::Image &image);
+
 
 private slots:
     void show_widgets(bool show);

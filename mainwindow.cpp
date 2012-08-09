@@ -16,10 +16,9 @@ MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
     op = new Operations;
 
     connect(op, SIGNAL(finished()), this, SLOT(restoreInterface()));  //returns interfacr to normal on close
+    connect(op, SIGNAL(newImage(const FCam::Image &)), this, SLOT(newImage(const FCam::Image &) ) );
 
     if(commands == 0){ //Not assigned
-
-        connect(op, SIGNAL(newImage()), this, SLOT(jubilate()) );
 
         readLastWorkingSettings();
         width = op->width;
@@ -31,7 +30,6 @@ MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
         ui->label_mask_hint->show();
     }
     else{ //Perform commandLineOps
-
         connect(op,SIGNAL(finished()), this, SLOT(closeAndExit()));
 
         op->limitVal = commands->white;
@@ -127,14 +125,10 @@ void MainWindow::showExpanded()
 void MainWindow::on_pushButton_clicked()
 {
     readLastWorkingSettings();
-
-    op->erodeVar = ui->maskEdit->text().toInt();
-
     show_widgets(false);
-
+    op->erodeVar = ui->maskEdit->text().toInt();
     op->start();
 }
-
 
 void MainWindow::on_mask_slide_sliderMoved(int position)
 {
@@ -339,6 +333,9 @@ void MainWindow::restoreInterface(){
     show_widgets(true);
 }
 
-void MainWindow::jubilate(){
-    cout << "IMAGE GOTTEN YEEEAAAH" << endl;
+void MainWindow::newImage(const FCam::Image &image){
+    cout << "IMAGE YEEEAAAH" << endl;
+
+    QImage thumbQ(image(1,1), image.width()/2, image.height()/2, QImage::Format_RGB32);
+    ui->imageLab->setPixmap(QPixmap::fromImage(thumbQ));
 }
