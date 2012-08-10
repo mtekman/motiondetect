@@ -48,8 +48,6 @@ OTHER_FILES += \
     qtc_packaging/debian_fremantle/copyright \
     qtc_packaging/debian_fremantle/control \
     qtc_packaging/debian_fremantle/compat \
-    qtc_packaging/debian_fremantle/changelog \
-    Bugs.txt \
-    TODO.txt
+    qtc_packaging/debian_fremantle/changelog
 
 LIBS += -lpthread -ljpeg -L../.. -lFCam

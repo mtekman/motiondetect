@@ -21,7 +21,6 @@ using namespace cimg_library;
 int norm = 100; //custom normalisation amount
 QString current_save_image; //filename of last movement image -- shared for emailing
 
-
 CImg<unsigned char> reference; //Last reference
 
 // static class variables for saving images with movement
