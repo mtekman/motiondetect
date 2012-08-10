@@ -3,6 +3,9 @@
 
 #include <QtCore/QCoreApplication>
 
+
+int image_label_height = 100;
+
 MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -15,19 +18,20 @@ MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
     //initialise camerathread here. Prevents pointer problems with settings.
     op = new Operations;
 
-    connect(op, SIGNAL(finished()), this, SLOT(restoreInterface()));  //returns interfacr to normal on close
-    connect(op, SIGNAL(newImage(const FCam::Image &)), this, SLOT(newImage(const FCam::Image &) ) );
-
+    //this should be in if statement
     if(commands == 0){ //Not assigned
+        //For repeated use with newImage Slot
+        image_label_height = ui->imageLab->height();
+
+        connect(op, SIGNAL(finished()), this, SLOT(restoreInterface()));  //returns interfacr to normal on close
 
         readLastWorkingSettings();
+        on_mask_slide_sliderMoved(ui->mask_slide->value());
+
         width = op->width;
         ui->pushButton_stop->hide();
         ui->label_mask_hint->hide();
 
-        //Share ImageLabel -- so that Operations can access it.
-        img = ui->imageLab;
-        ui->label_mask_hint->show();
     }
     else{ //Perform commandLineOps
         connect(op,SIGNAL(finished()), this, SLOT(closeAndExit()));
@@ -148,50 +152,15 @@ void MainWindow::on_mask_slide_sliderMoved(int position)
     QString small =" - Smallest Noise-Free Mask";
     QString good = " - Good Mask Size for "+size;
 
-
     switch(width){
     case 320:
-        switch(mask){
-        case 0:
-        case 1:
-        case 2: display = warn; break;
-        case 3: display = small; break;
-        case 4: display = good; break;
-        default: display = ""; break;
-        }; break;
+        switch(mask){case 0:case 1:case 2: display = warn; break; case 3: display = small; break; case 4: display = good; break;default: display = ""; break;}; break;
     case 640:
-        switch(mask){
-        case 0:
-        case 1:
-        case 2:
-        case 3: display = warn; break;
-        case 4: display = small; break;
-        case 5: display = good; break;
-        default: display = ""; break;
-        }; break;
+        switch(mask){case 0:case 1:case 2:case 3: display = warn; break; case 4: display = small; break; case 5: display = good; break;default: display = ""; break;}; break;
     case 800:
-        switch(mask){
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4: display = warn; break;
-        case 5: display = small; break;
-        case 6: display = good; break;
-        default: display = ""; break;
-        }; break;
+        switch(mask){case 0:case 1:case 2:case 3:case 4: display = warn; break;case 5: display = small; break;case 6: display = good; break;default: display = ""; break;}; break;
     case 1280:
-        switch(mask){
-        case 0:
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5: display = warn; break;
-        case 6: display = small; break;
-        case 7: display = good; break;
-        default: display = ""; break;
-        }; break;
+        switch(mask){case 0:case 1:case 2:case 3:case 4:case 5: display = warn; break;case 6: display = small; break;case 7: display = good; break;default: display = ""; break;}; break;
     }
     ui->label_mask_hint->setText(QString::number(mask)+display);
     ui->label_mask_hint->move(coords);
@@ -219,7 +188,7 @@ void MainWindow::show_widgets(bool show)
     if(!show)
     {
         //Disable widgets
-        ui->mask_slide->setDisabled(true); ui->maskEdit->setDisabled(true);
+        ui->mask_slide->setDisabled(true); ui->maskEdit->setDisabled(true); ui->label_3->setDisabled(true);
         //Hide button
         ui->pushButton->hide(); ui->pushButton_stop->show(); ui->pushButton_settings->setDisabled(true);
         ui->label_mask_hint->hide();
@@ -228,8 +197,8 @@ void MainWindow::show_widgets(bool show)
     else
     {
         //Enable widgets
-        ui->mask_slide->setEnabled(true); ui->maskEdit->setEnabled(true);
-        ui->pushButton->hide();
+        ui->mask_slide->setEnabled(true); ui->maskEdit->setEnabled(true); ui->label_3->setEnabled(true);
+        //ui->pushButton->hide();
         //Show button
         ui->pushButton->show(); ui->pushButton_stop->hide(); ui->pushButton_settings->setEnabled(true);
         ui->label_mask_hint->show();
@@ -333,9 +302,25 @@ void MainWindow::restoreInterface(){
     show_widgets(true);
 }
 
-void MainWindow::newImage(const FCam::Image &image){
-    cout << "IMAGE YEEEAAAH" << endl;
+//TODO: Tick box for dispalying image in UI, and disable by default for cmdline
 
-    QImage thumbQ(image(1,1), image.width()/2, image.height()/2, QImage::Format_RGB32);
-    ui->imageLab->setPixmap(QPixmap::fromImage(thumbQ));
+void MainWindow::newImage(const FCam::Image &image){
+    //cout << "Got image" << endl;
+    QImage thumbQ(image(0,0), image.width()/2, image.height()/2, image.bytesPerRow()*2, QImage::Format_RGB32);
+
+    QPixmap qp(QPixmap::fromImage(thumbQ));
+    ui->imageLab->setPixmap(qp.scaledToHeight(image_label_height) );
+
+}
+
+void MainWindow::on_checkBox_show_image_clicked(bool checked)
+{
+    if(checked) {
+        connect(op, SIGNAL(newImage(const FCam::Image &)), this, SLOT(newImage(const FCam::Image &) ) );
+        ui->imageLab->show();
+    }
+    else {
+        disconnect(op, SIGNAL(newImage(const FCam::Image &)), this, SLOT(newImage(const FCam::Image &) ) );
+        ui->imageLab->hide();
+    }
 }

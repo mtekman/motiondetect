@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QtGui/QMainWindow>
-#include <QLabel>
 #include <QSettings>
 #include <iostream>
 #include "settings.h"
@@ -33,8 +32,6 @@ public:
     explicit MainWindow(CommandLine *commands = 0,QWidget *parent = 0);
     virtual ~MainWindow();
 
-    QLabel *img;
-
     // Note that this will only have an effect on Symbian and Fremantle.
     void setOrientation(ScreenOrientation orientation);
 
@@ -57,6 +54,9 @@ public slots: //why public? So main.cpp can use them via cmdline
 
 private slots:
     void show_widgets(bool show);
+
+
+    void on_checkBox_show_image_clicked(bool checked);
 
 private:
     Ui::MainWindow *ui;

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>384</height>
+    <height>410</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,20 +43,7 @@ Size</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1" rowspan="3" colspan="4">
-      <widget class="QLabel" name="imageLab">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" rowspan="2">
+     <item row="1" column="0" rowspan="3">
       <widget class="QSlider" name="mask_slide">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
@@ -75,7 +62,7 @@ Size</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QLineEdit" name="maskEdit">
        <property name="enabled">
         <bool>true</bool>
@@ -97,19 +84,6 @@ Size</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="pushButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Start</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="3">
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
@@ -122,6 +96,13 @@ Size</string>
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="0" column="5">
+      <widget class="QPushButton" name="pushButton_settings">
+       <property name="text">
+        <string>Advanced Settings</string>
+       </property>
+      </widget>
      </item>
      <item row="0" column="2">
       <widget class="QPushButton" name="pushButton_stop">
@@ -137,11 +118,76 @@ Size</string>
       </widget>
      </item>
      <item row="0" column="4">
-      <widget class="QPushButton" name="pushButton_settings">
+      <widget class="QCheckBox" name="checkBox_show_image">
        <property name="text">
-        <string>Advanced Settings</string>
+        <string>Show Image</string>
        </property>
       </widget>
+     </item>
+     <item row="2" column="3" colspan="2">
+      <widget class="QPushButton" name="pushButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Start</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2" colspan="4">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="3" column="2" colspan="4">
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="2" column="5">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="2" column="2">
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </widget>
@@ -168,6 +214,28 @@ Size</string>
      <string>You shouldn't see this...</string>
     </property>
    </widget>
+   <widget class="QLabel" name="imageLab">
+    <property name="geometry">
+     <rect>
+      <x>193</x>
+      <y>80</y>
+      <width>431</width>
+      <height>261</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <zorder>imageLab</zorder>
+   <zorder>gridLayoutWidget</zorder>
+   <zorder>label_mask_hint</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
