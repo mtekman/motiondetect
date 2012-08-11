@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include <QtCore/QCoreApplication>
-
+#include <QCloseEvent>
 
 int image_label_height = 100;
 
@@ -56,6 +56,9 @@ MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
         op->image_dir = commands->dir;
 
         op->erodeVar = commands->mask;
+
+        op->time.setDate(commands->time->date());
+        op->time.setTime(commands->time->time());
 
         op->initial();
         op->start();
@@ -136,6 +139,8 @@ void MainWindow::on_pushButton_clicked()
 
 void MainWindow::on_mask_slide_sliderMoved(int position)
 {
+    ui->label_mask_hint->show();
+
     int mask = (0.2*exp( 0.059915*position) )+3;
     ui->maskEdit->setText(QString::number(mask));
 
@@ -187,6 +192,7 @@ void MainWindow::show_widgets(bool show)
 {
     if(!show)
     {
+        ui->imageLab->show();
         //Disable widgets
         ui->mask_slide->setDisabled(true); ui->maskEdit->setDisabled(true); ui->label_3->setDisabled(true);
         //Hide button
@@ -196,6 +202,7 @@ void MainWindow::show_widgets(bool show)
     }
     else
     {
+        ui->imageLab->hide();
         //Enable widgets
         ui->mask_slide->setEnabled(true); ui->maskEdit->setEnabled(true); ui->label_3->setEnabled(true);
         //ui->pushButton->hide();
@@ -222,12 +229,15 @@ void MainWindow::writeSettings(bool new_ones){
 
         QSettings settings("fcam");
         settings.beginGroup("main");
+
+        settings.setValue("time", QTime(0,1));
+
         settings.setValue("width", 320);
         settings.setValue("height", 240);
 
         settings.setValue("mask_slider", 5);
-        settings.setValue("interval_max", 3000);
-        settings.setValue("interval_min", 1000);
+        settings.setValue("interval_max", 10);
+        settings.setValue("interval_min", 1);
         settings.setValue("interval_modifier",0.16);
 
         settings.setValue("whitepix_value", 100);
@@ -246,7 +256,6 @@ void MainWindow::writeSettings(bool new_ones){
 
         //Now execute
         readLastWorkingSettings();
-
     }
 }
 
@@ -267,6 +276,9 @@ void MainWindow::readLastWorkingSettings()
 
         ui->mask_slide->setValue(slide);
         on_mask_slide_sliderMoved(slide);
+
+        QTime tim = settings.value("time").toTime();
+        op->time = QDateTime(QDateTime::currentDateTime().addSecs( (60*60*tim.hour())+(60*tim.minute())+tim.second() ) );
 
         op->limitVal = settings.value("whitepix_value").toInt();
         op->interval_max = settings.value("interval_max").toInt();
@@ -302,15 +314,12 @@ void MainWindow::restoreInterface(){
     show_widgets(true);
 }
 
-//TODO: Tick box for dispalying image in UI, and disable by default for cmdline
-
 void MainWindow::newImage(const FCam::Image &image){
     //cout << "Got image" << endl;
     QImage thumbQ(image(0,0), image.width()/2, image.height()/2, image.bytesPerRow()*2, QImage::Format_RGB32);
 
     QPixmap qp(QPixmap::fromImage(thumbQ));
     ui->imageLab->setPixmap(qp.scaledToHeight(image_label_height) );
-
 }
 
 void MainWindow::on_checkBox_show_image_clicked(bool checked)
@@ -323,4 +332,17 @@ void MainWindow::on_checkBox_show_image_clicked(bool checked)
         disconnect(op, SIGNAL(newImage(const FCam::Image &)), this, SLOT(newImage(const FCam::Image &) ) );
         ui->imageLab->hide();
     }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event){
+    event->ignore();
+    op->stop();
+
+    ui->label_mask_hint->show();
+    ui->label_mask_hint->setText("Stopping Camera, Please Wait!");
+    ui->label_mask_hint->raise();
+    ui->label_mask_hint->move(ui->pushButton->pos());
+
+    while(op->isRunning()){/*Wait*/}
+    event->accept();
 }

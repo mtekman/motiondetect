@@ -62,6 +62,7 @@ private:
     Ui::MainWindow *ui;
     void readLastWorkingSettings();
     void writeSettings(bool new_ones=false);
+    void closeEvent(QCloseEvent *event);
 
 };
 
