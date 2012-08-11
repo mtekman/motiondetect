@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>410</height>
+    <height>382</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -124,19 +124,6 @@ Size</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="3" colspan="2">
-      <widget class="QPushButton" name="pushButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Start</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="2" colspan="4">
       <spacer name="verticalSpacer">
        <property name="orientation">
@@ -189,15 +176,28 @@ Size</string>
        </property>
       </spacer>
      </item>
+     <item row="2" column="3" colspan="2">
+      <widget class="QPushButton" name="pushButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Start</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
    <widget class="QLabel" name="label_mask_hint">
     <property name="geometry">
      <rect>
-      <x>160</x>
-      <y>430</y>
-      <width>421</width>
-      <height>111</height>
+      <x>240</x>
+      <y>410</y>
+      <width>321</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
@@ -233,9 +233,9 @@ Size</string>
      <string/>
     </property>
    </widget>
+   <zorder>label_mask_hint</zorder>
    <zorder>imageLab</zorder>
    <zorder>gridLayoutWidget</zorder>
-   <zorder>label_mask_hint</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
