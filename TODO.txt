@@ -1,13 +1,10 @@
-See how mask detection varies with image size --- which needs to be an advanced variable.
+*Create in Settings Window Video FileName
 
-Create in Settings Window:
-    Video FileName
-
-    Timestamp for subject text in email tab
-
-    Change emergency stop to regular stop -that can save images.
-    Two pressed means emergency stop.
+*Class for Intervalometer -- calls functions in Operations and takes a single (well exposed) image.
+It should have (final) QDateTime argument that it compares with the current QDateTime::currentDateTime(), and if greater than
+it converts to filename.mpg and exits.
+---Need to start playing around with cron strings.
 
 
-(optional)    Display image in mainwindow option.
-(optionnal)    Display image in mainwindow with overlay of subtracted image for showing where motion occured.
+Perhaps talk about in the write up that you originally made phonestreamer, and that you plan on implementing the motiondetector and
+intervalometer as core components of the app. But the GStreamer stuff is NOT the main focus.
