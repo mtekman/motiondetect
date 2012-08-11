@@ -10,13 +10,12 @@
 #include <FCam/Image.h>
 #include <QPicture>
 #include <QLabel>
+#include <QDateTime>
 #include "CImg.h"
 #include "functions.cpp"
 
 using namespace cimg_library;
-
-//namespace Plat = FCam::N900;
-
+using namespace std;
 //
 int norm = 100; //custom normalisation amount
 QString current_save_image; //filename of last movement image -- shared for emailing
@@ -28,17 +27,14 @@ int image_count = 0;
 QString save_dir;
 
 void Operations::run(){
-    std::cout << "range=(" << interval_min << "," << interval_max << ") mod="<< interval_mod<< " white="<< limitVal
-         << " size=("<< width <<","<< height
-         << ") Mask=" << erodeVar
-         <<" convert="<< convert_images <<" delete="<< delete_images
-        << " dir=" << image_dir.toUtf8().data()
-        << "\nEmail:" << emailAlert << " " << email_address.toUtf8().data()
-        << " " << email_message.toUtf8().data() << " "
-        <<email_subject.toUtf8().data() << " "<<email_attach << std::endl;
+    cout<< "Range=(" << interval_min << "," << interval_max << ") Mod="<< interval_mod<< ", White="<< limitVal
+        << ", Size=("<< width <<","<< height << "),  Mask=" << erodeVar <<", Convert="<< convert_images <<", Delete="<< delete_images
+        << "\nDir=" << image_dir.toUtf8().data() << " Email:" << emailAlert << " " << email_address.toUtf8().data() << " "
+        << email_message.toUtf8().data() << " " << email_subject.toUtf8().data() << " "<< email_attach
+        << "\nCurrent Datetime : " << QDateTime::currentDateTime().toString().toUtf8().data()
+        << "\nDateTime Variable: " << time.toString().toUtf8().data() << endl;
 
-
-    std::cout << "CameraThread: Started" << std::endl;
+    cout << "CameraThread: Started" << endl;
 
     if(lensClosed()) {
         willStop = true;
@@ -47,13 +43,9 @@ void Operations::run(){
     else{
         initial();
         save_dir = image_dir;
-
-        std::cout << "Getting exposure" << std::endl;
+        updateReferenceImage(10);
         QThread::sleep(2);
-        defineGoodExposure();
-        std::cout << "Got static\n" << std::endl;
-
-        updateReferenceImage();
+        cout << "\rGot static" << endl;
         checkMovement(interval_max*1000, interval_min*1000,interval_mod, limitVal);
         finishAndClose();
     }
@@ -84,8 +76,8 @@ void Operations::initial(){
 void Operations::finishAndClose(){
     // Order the sensor to stop the pipeline and discard any frames still in it.
     sensor1.stop();
-    std::cout << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
-    std::cout << "\nFinal color temperature: " << frame1.whiteBalance() << "K" << std::endl;
+    cout << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
+    cout << "\nFinal color temperature: " << frame1.whiteBalance() << "K" << endl;
     // Check that the pipeline is empty
     assert(sensor1.framesPending() == 0);
     assert(sensor1.shotsPending() == 0);
@@ -96,7 +88,7 @@ void Operations::finishAndClose(){
         //Convert images to movie, bool = delete images
         if(convert_images) convertToMP4(save_dir,delete_images);
     }
-    std::cout << "Camera Thread exited\n" << std::endl;
+    cout << "Camera Thread exited\n" << endl;
 }
 
 
@@ -105,13 +97,13 @@ void Operations::errorCheck() {
     // Make sure FCam is running properly by looking for DriverError
     FCam::Event e;
     while (FCam::getNextEvent(&e, FCam::Event::Error)) {
-        std::cout << "Error: " << e.description << std::endl;
+        cout << "Error: " << e.description << endl;
         if (e.data == FCam::Event::DriverMissingError) {
-            std::cout << "fcam-drivers missing. Please install, then reboot." << std::endl;
+            cout << "fcam-drivers missing. Please install, then reboot." << endl;
             exit(1);
         }
         if (e.data == FCam::Event::DriverLockedError) {
-            std::cout << "Another FCam is running" << std::endl;
+            cout << "Another FCam is running" << endl;
             exit(1);
         }
     }
@@ -129,6 +121,9 @@ void Operations::defineGoodExposure(int stableframenum)
     int stableCount = 0;    // # of consecutive frames with stable exposure
     float exposure;         // total exposure for the current frame (exposure time * gain)
     float lastExposure = 0; // total exposure for the previous frame
+
+    char disp[8] = {'|','|','/','/','-','-','\\','\\'};      //Progress Spinner
+
     //----- Stage1 ---- Grab a static base background image ----------------
     do {
         //Grab frame
@@ -159,18 +154,19 @@ void Operations::defineGoodExposure(int stableframenum)
         // Update lastExposure
         lastExposure = exposure;
         count++;
+        cout << '\r' << disp[count%8] << flush;
     } while (stableCount < stableframenum); // Terminate when stable for 10 frames
     //Constant background image obtained, now make greyscale
 
 }
 
-void Operations::updateReferenceImage(){
+void Operations::updateReferenceImage(int frames){
 
     stream1.frameTime = 0; // fast as possible (min exposure)
     sensor1.stream(stream1);   //apply params
 
-    //Adapt brightness
-    defineGoodExposure(4);
+    //Re-expose for changes in brightness (sunshine,etc)
+    defineGoodExposure(frames);
 
     frame1 = sensor1.getFrame(); //grab first frame
     assert(frame1.shot().id == stream1.id); // check source matches.
@@ -183,16 +179,13 @@ void Operations::updateReferenceImage(){
     convertImage(image, img);
 
     reference = img/norm;
-    std::cout << "Updated reference image\n" << std::endl;
+    cout << "\rUpdated reference image." << endl;
 }
 
 /** Subtracts normalized frames from an reference frame **/
 void Operations::checkMovement(int max, int min, float mod, int limit)
 {
     EmailThread *em;                //Shared
-    time_t tim = time(0);           //Updated
-
-    int count = 40;                 //Countdown to 0, then terminate. Debug only.
 
     stream1.frameTime = 0;
     sensor1.stream(stream1);
@@ -200,9 +193,12 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
     unsigned int current_interval = max/2; //halved so that it can grow
     unsigned int consec_no_movement = 0;
 
-    std::cout << "White Pixel Threshold is " << limit << std::endl;
+    cout << "White Pixel Threshold is " << limit << endl;
 
     do{
+        cout << "secs to: " << QDateTime::currentDateTime().secsTo(time) << endl;
+
+
         //1. Grab a valid frame
         frame1 = sensor1.getFrame();
         assert(frame1.shot().id == stream1.id);
@@ -218,21 +214,23 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
         //3. Get subtracted difference between current image and reference
         CImg<unsigned char> sub = (img-reference).normalize();    //Normalize to {0,1}
 
-        //4. Count number of white pixels
+        /*4. Count number of white pixels       -- Can skip this step for speed.
+        cout << "Normal - ";
         int totalN = 0; cimg_forXYZC(sub,x,y,z,c) if(sub(x,y,z,c) > 0) totalN++;
+        cout << totalN << "  ";*/
 
         //5. Perform Open/Close and recount
         sub = sub.erode(erodeVar).dilate(erodeVar);
+        cout << "After Filter - ";
         int totalE = 0; cimg_forXYZC(sub,x,y,z,c) if(sub(x,y,z,c) > 0) totalE++;
+        cout << totalE;
 
-        std::cout << "Totals: Normal - " << totalN << ", Noise Removal -" << totalE << " count=" << count
-                  << " Interval:" << current_interval << std::endl;
+        cout << "  Interval:" << current_interval << endl;
 
         //6. Check for movement -- if so: get new reference image
         if (totalE > limit)
         {
-            tim = time(0); // Update time
-            std::cout << " Movement at " << tim << std::endl;
+            cout << "---Movement at time " << QTime::currentTime().toString().toUtf8().data() << endl;
             record(10,20);             //record 10 images in quick succession.
             updateReferenceImage();
             alert("Movement!", false);
@@ -262,7 +260,7 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
         // Reduces overhead
         QThread::msleep(current_interval);
 
-    }while(count-- > 0 && !willStop);
+    }while( (QDateTime::currentDateTime().secsTo(time)>0) && !willStop);
 }
 
 void Operations::record(int frame_num, int interval)
@@ -279,9 +277,10 @@ void Operations::record(int frame_num, int interval)
         QString num = QString("%1").arg(image_count, 5, 10, QChar('0'));   //00001.jpg, 00002.jpg, etc.
         // to Filename
         current_save_image = save_dir+num+".jpg";
-        std::string file = current_save_image.toUtf8().constData();
+        string file = current_save_image.toUtf8().constData();
 
-        std::cout << "Record:" << current_save_image.toUtf8().data() << std::endl;
+        cout << "\rRecording :" << count << " " << file << flush;
+        //cout << "Record:" << file << endl;
 
         const FCam::Image &image = frame1.image();
         FCam::saveJPEG(image,file); //saves using FCAM instead of CImg -- faster.
@@ -289,4 +288,7 @@ void Operations::record(int frame_num, int interval)
         image_count++;
     }
     while (count ++<frame_num && !willStop);
+
+    cout << "  done!" << endl;
+
 }

@@ -4,6 +4,7 @@
 #include <QThread>
 #include <FCam/Frame.h>
 #include <FCam/N900.h>
+#include <QDateTime>
 
 //multiple inherit
 class Operations : public QThread
@@ -29,8 +30,9 @@ public:
 
     QString image_dir;
 
-    //double triggerFract
-    //Time is in microseconds *10^-6
+    QDateTime time;
+
+
     Operations();
     void finishAndClose();
     //No destructor
@@ -60,7 +62,7 @@ private:
     void errorCheck();
     void defineGoodExposure(int stableframenum = 10); //50ms
     //For Debugging:
-    void updateReferenceImage();
+    void updateReferenceImage(int frames=4);
 
     void checkMovement(int max=2000, int min=1000, float mod=0.8, int limit=200);
 
