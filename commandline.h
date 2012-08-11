@@ -28,6 +28,7 @@ public:
     bool email,attach;
     QString address, message, subject;
 
+
 private:
   void checkVersionOrHelp();
   void checkMask();
@@ -39,7 +40,6 @@ private:
   void checkImageDir();
   void checkEmail();
   void unknowns();
-
 };
 
 #endif // COMMANDLINE_H

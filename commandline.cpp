@@ -23,8 +23,9 @@ CommandLine::CommandLine(QStringList &arguments){
     //Email
     checkEmail();
 
+
     //Echo out commands not understood
-    unknowns(); //Halt here for unknowns variables
+    unknowns(); //Halt here for unknown variables
 
 //    cout << "range=(" << min << "," << max << ") mod="<< mod<< " white="<< white << " size=("<< width <<","<< height
 //         <<") Show=" << show << " Mask=" << mask
@@ -35,6 +36,7 @@ CommandLine::CommandLine(QStringList &arguments){
 
 CommandLine::~CommandLine(){}
 
+
 void CommandLine::checkMask(){
     int m_index = 0; mask = 5; //default
     if( ((m_index=args.indexOf("--mask"))!=-1) || ((m_index=args.indexOf("-m"))!=-1) )
@@ -44,6 +46,7 @@ void CommandLine::checkMask(){
             cerr << "Invalid Mask Size" << endl;
             exit(1);
         }
+        args.removeAt(m_index+1); args.removeAt(m_index);
     }
 }
 
@@ -63,11 +66,11 @@ void CommandLine::checkEmail()
 
         email = true;
 
-        //count args until next flag
+        // Count args until next flag
         int index = email_index;
         while( (++index < args.length()-1) && (args.at(index).at(0)!='-')){/*count*/}
 
-        cout << "Args #:" << (index - email_index) << endl;
+        //cout << "Args #:" << (index - email_index) << endl;
         if ((index - email_index)!=4){
             cerr << "email format is: -e <address> <message> <subject> <Y/N>" << endl;
             exit(1);
@@ -105,13 +108,21 @@ void CommandLine::checkImageDir()
 void CommandLine::checkConvertDelete()
 {
     del = convert = false; //default
-    if(del=  ((args.contains("--delete")) || (args.contains("-d")) ) ){
-        if (convert= !( (args.contains("--convert")) || (args.contains("-c")) ) )
-        {
-            cerr << "Why delete images you wont convert? Delete images after you convert them first." << endl;
-            exit(1);
-        }
+
+    int d_i = 0, c_i = 0;
+    if( (d_i=args.indexOf("--delete"))!=-1 || (d_i=args.indexOf("-d"))!=-1 ){
+        del = true; args.removeAt(d_i);
     }
+    if ( (c_i=args.indexOf("--convert"))!=-1 || (c_i=args.indexOf("-c"))!=-1 ){
+        convert = true; args.removeAt(c_i);
+    }
+    if(del && !convert)
+    {
+            cerr << "Delete images after you convert them first.\n"
+                    "Otherwise the app saves frames for nothing." << endl;
+            exit(1);
+    }
+
 }
 
 void CommandLine::checkSize()
@@ -188,7 +199,7 @@ void CommandLine::checkRange()
 void CommandLine::checkModifier(){
     mod = 0.16; //default
     int m_index=0;
-    if( (m_index=args.indexOf("-m"))!=-1 ||
+    if( (m_index=args.indexOf("-f"))!=-1 ||
             (m_index=args.indexOf("--modifier"))!=-1){
         mod = args.at(m_index+1).toFloat();
         if(mod==0 || mod<0 || mod>1){
@@ -213,12 +224,12 @@ void CommandLine::checkVersionOrHelp(){
               "  -v, --version\t\t* Display version\n"
               "  -m, --mask INT\t\t* Size of mask in square pixels\n"
               "  -i, --images DIRECTORY \t* Where images are saved.\n\t\t\t\t  Default:/home/user/MyDocs/DCIM/MISC/\n"
-              "  -c, --convert\t\t* Converts movement images to an\n\t\t\t\t  MPG file in te image directory\n"
-              "  -d, --delete\t\t* Deletes images on app exit. \n\t\t\t\t  Useful only if convert flag specified too\n"
+              "  -c, --convert\t\t* Converts movement images to an\n\t\t\t  MPG file in te image directory\n"
+              "  -d, --delete\t\t   * Deletes images on app exit. \n\t\t\t     Useful only if convert flag specified too\n"
               "  -s, --size WIDTH HEIGHT\t* Valid sizes are: 320 240,\n\t\t\t\t  640 480, 800 600, 1280 960\n"
               "  -w, --whitepix INT\t* Threshold for detecting\n\t\t\t  white pixels in eroded images. Default is 100.\n"
-              "  -r, --range MIN MAX\t* Intervals in seconds that\n\t\t\t  camera varies between.\n"
-              "  -m, --modifier FLOAT\t* Determines adaptiveness of\n\t\t\t  camera interval. 0.1 v.responsive --> 1.0 constant.\n"
+              "  -r, --range MIN MAX\t* Intervals in seconds that\n\t\t\t  camera varies between. Default is 1 and 10\n"
+              "  -f, --modifier FLOAT\t* Determines adaptiveness of\n\t\t\t  camera interval. 0.1 v.responsive --> 1.0 constant.\n"
               "  -e, --email ADDRESS MESSAGE SUBJECT [Y/N]\n\t* Email upon movement. Y attaches the last image to email.\n"
         << endl;
         exit(1);
