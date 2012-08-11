@@ -4,6 +4,7 @@
 #include <QString>
 #include <QStringList>
 #include <iostream>
+#include <QDateTime>
 
 using namespace std;
 
@@ -28,6 +29,10 @@ public:
     bool email,attach;
     QString address, message, subject;
 
+    char *c_file;
+
+    QDateTime *time;
+
 
 private:
   void checkVersionOrHelp();
@@ -39,6 +44,8 @@ private:
   void checkConvertDelete();
   void checkImageDir();
   void checkEmail();
+  void checkToFile();
+  void checkTime();
   void unknowns();
 };
 

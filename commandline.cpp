@@ -1,4 +1,5 @@
 #include "commandline.h"
+#include <QString>
 
 CommandLine::CommandLine(QStringList &arguments){
     args = arguments;
@@ -22,19 +23,92 @@ CommandLine::CommandLine(QStringList &arguments){
     checkImageDir();
     //Email
     checkEmail();
-
+    //Time
+    checkTime();
+    // Output File
+    checkToFile();
 
     //Echo out commands not understood
     unknowns(); //Halt here for unknown variables
 
-//    cout << "range=(" << min << "," << max << ") mod="<< mod<< " white="<< white << " size=("<< width <<","<< height
-//         <<") Show=" << show << " Mask=" << mask
-//         <<" convert="<< convert <<" delete="<< del << " dir=" << dir.toUtf8().data()
-//        << "\nEmail:" << email << " " << address.toUtf8().data() << " " << message.toUtf8().data() << " "<<subject.toUtf8().data() << " "<<attach << endl;
-
 }
 
 CommandLine::~CommandLine(){}
+
+void CommandLine::checkTime(){
+    int t_index = 0;
+    time = new QDateTime(QDate(0,0,0), QTime(0,1) ); //1 minute Default
+    if ( (t_index=args.indexOf("-t"))!=-1 || (t_index=args.indexOf("--time"))!=-1 )
+    {
+        QStringList time_list = args.at(t_index+1).split(":");
+        int secs=0, mins=1, hour=0, days=0; //default
+
+        switch(time_list.length()){
+        case 1:{
+            //Single number specified -- Seconds.
+            secs = time_list.at(0).toInt();
+            if(secs==0)
+            {
+                cerr << "Not valid seconds" << endl;
+                exit(1);
+            }
+            break;
+        }
+        case 2:{
+            //Two numbers -- mm:ss
+            mins = time_list.at(0).toInt();
+            secs = time_list.at(1).toInt();
+            break;
+        }
+        case 3:{
+            //hh:mm:ss
+            hour = time_list.at(0).toInt();
+            mins = time_list.at(1).toInt();
+            secs = time_list.at(2).toInt();
+            break;
+        }
+        case 4:{
+            //dd:hh:mm:ss
+            days = time_list.at(0).toInt();
+            hour = time_list.at(1).toInt();
+            mins = time_list.at(2).toInt();
+            secs = time_list.at(3).toInt();
+            break;
+        }
+        default:{
+            cerr << "Too few or too many variables given for time argument" << endl;
+            exit(1); break; //<- hah!
+        }
+        }
+
+        if( days==0 && hour==0 && mins==0 && secs<10){
+            cerr << "Invalid time specified. Please consult --help for compatible time formats." << endl;
+        }
+        //Set datetime -- append current;
+        //cout << "Current Date and Time: " << QDateTime::currentDateTime().toString().toUtf8().data() << endl;
+        time = new QDateTime(QDateTime::currentDateTime()
+                             .addSecs( (60*60*hour)+(60*mins)+secs)
+                             .addDays(days));
+        //cout << "Newly   Date and Time: " << time->toString().toUtf8().data() << endl;
+        args.removeAt(t_index+1); args.removeAt(t_index);
+    }
+}
+
+
+void CommandLine::checkToFile(){
+    int c_index = 0;
+    c_file = "/home/user/MyDocs/DCIM/MISC/log.txt"; //default
+    if((c_index =args.indexOf("--file"))!=-1 || (c_index =args.indexOf("-f"))!=-1 )
+    {
+        c_file = args.at(c_index+1).toUtf8().data();
+        if(strlen(c_file)< 5){
+            cerr << "Invalid filename" << endl;
+            exit(1);
+        }
+
+        args.removeAt(c_index+1);args.removeAt(c_index);
+    }
+}
 
 
 void CommandLine::checkMask(){
@@ -62,7 +136,7 @@ void CommandLine::checkEmail()
 
     int email_index = 0;
     if( (email_index=args.indexOf("-e"))!=-1 ||
-        (email_index=args.indexOf("--email"))!=-1 ){
+            (email_index=args.indexOf("--email"))!=-1 ){
 
         email = true;
 
@@ -118,9 +192,9 @@ void CommandLine::checkConvertDelete()
     }
     if(del && !convert)
     {
-            cerr << "Delete images after you convert them first.\n"
-                    "Otherwise the app saves frames for nothing." << endl;
-            exit(1);
+        cerr << "Delete images after you convert them first.\n"
+                "Otherwise the app saves frames for nothing." << endl;
+        exit(1);
     }
 
 }
@@ -199,8 +273,8 @@ void CommandLine::checkRange()
 void CommandLine::checkModifier(){
     mod = 0.16; //default
     int m_index=0;
-    if( (m_index=args.indexOf("-f"))!=-1 ||
-            (m_index=args.indexOf("--modifier"))!=-1){
+    if( (m_index=args.indexOf("-a"))!=-1 ||
+            (m_index=args.indexOf("--adapt"))!=-1){
         mod = args.at(m_index+1).toFloat();
         if(mod==0 || mod<0 || mod>1){
             cerr << mod << " is not a valid float value. Using default 0.16" << endl;
@@ -220,18 +294,20 @@ void CommandLine::checkVersionOrHelp(){
     if(args.contains("-h") || args.contains("--help"))
     {
         cout << "usage: motiondetect [OPTION...]\n"
-              "  -h, --help\t\t* Print this help\n"
-              "  -v, --version\t\t* Display version\n"
-              "  -m, --mask INT\t\t* Size of mask in square pixels\n"
-              "  -i, --images DIRECTORY \t* Where images are saved.\n\t\t\t\t  Default:/home/user/MyDocs/DCIM/MISC/\n"
-              "  -c, --convert\t\t* Converts movement images to an\n\t\t\t  MPG file in te image directory\n"
-              "  -d, --delete\t\t   * Deletes images on app exit. \n\t\t\t     Useful only if convert flag specified too\n"
-              "  -s, --size WIDTH HEIGHT\t* Valid sizes are: 320 240,\n\t\t\t\t  640 480, 800 600, 1280 960\n"
-              "  -w, --whitepix INT\t* Threshold for detecting\n\t\t\t  white pixels in eroded images. Default is 100.\n"
-              "  -r, --range MIN MAX\t* Intervals in seconds that\n\t\t\t  camera varies between. Default is 1 and 10\n"
-              "  -f, --modifier FLOAT\t* Determines adaptiveness of\n\t\t\t  camera interval. 0.1 v.responsive --> 1.0 constant.\n"
-              "  -e, --email ADDRESS MESSAGE SUBJECT [Y/N]\n\t* Email upon movement. Y attaches the last image to email.\n"
-        << endl;
+                "  -h, --help\t\t* Print this help\n"
+                "  -v, --version\t\t* Display version\n"
+                "  -m, --mask INT\t\t* Size of mask in square pixels\n"
+                "  -i, --images DIRECTORY \t* Where images are saved.\n\t\t\t\t  Default:/home/user/MyDocs/DCIM/MISC/\n"
+                "  -c, --convert\t\t* Converts movement images to an\n\t\t\t  MPG file in te image directory\n"
+                "  -d, --delete\t\t   * Deletes images on app exit. \n\t\t\t     Useful only if convert flag specified too\n"
+                "  -s, --size WIDTH HEIGHT\t* Valid sizes are: 320 240,\n\t\t\t\t  640 480, 800 600, 1280 960\n"
+                "  -w, --whitepix INT\t* Threshold for detecting\n\t\t\t  white pixels in eroded images. Default is 100.\n"
+                "  -r, --range MIN MAX\t* Intervals in seconds that\n\t\t\t  camera varies between. Default is 1 and 10\n"
+                "  -a, --adapt FLOAT\t* Determines adaptiveness of\n\t\t\t  camera interval. 0.1 v.responsive --> 1.0 constant.\n"
+                "  -e, --email ADDRESS MESSAGE SUBJECT [Y/N]\n\t* Email upon movement. Y attaches the last image to email.\n"
+                "  -f, --file FILENAME\t\t* Output is echoed into a (log) file.\n"
+                "  -t, --time secs OR mm:ss OR hh:mm:ss OR dd:hh:mm:ss."
+             << endl;
         exit(1);
     }
 }
