@@ -39,6 +39,8 @@ private slots:
 
     void on_horizontalSlider_modifier_sliderMoved(int position);
 
+    void on_timeEdit_editingFinished();
+
 private:
     bool saved;
     Ui::Settings *ui;

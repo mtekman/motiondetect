@@ -56,6 +56,8 @@ void Settings::on_pushButton_reset_clicked()
     on_horizontalSlider_modifier_sliderMoved(16);
     //ui->lineEdit_modifier->setText("0.16");
 
+    ui->timeEdit->setTime(QTime(0,1)); //60 seconds
+
     //Email
     ui->checkBox_attach->setChecked(false);
     ui->lineEdit_Address->setText("blank@blanketyblank.blank");
@@ -100,9 +102,6 @@ void Settings::on_pushButton_browse_clicked()
     if(!dir.endsWith('/')) dir.append('/');
 
     ui->lineEdit_image_dir->setText(dir);
-
-
-
 }
 
 void Settings::on_dial_size_sliderMoved(int position)
@@ -126,6 +125,8 @@ void Settings::on_dial_size_sliderMoved(int position)
 void Settings::writeSettings(){
     QSettings settings("fcam");
     settings.beginGroup("main");
+
+    settings.setValue("time", ui->timeEdit->time());
 
     settings.setValue("whitepixel_slider", ui->dial_whitepixel->value());
     settings.setValue("whitepix_value", ui->lineEdit_whitepixel->text().toUInt());
@@ -170,6 +171,9 @@ void Settings::writeSettings(){
 void Settings::readSettings(){
     QSettings settings("fcam");
     settings.beginGroup("main");
+
+    QTime tim = settings.value("time").toTime();
+    ui->timeEdit->setTime(tim);
 
     int mx = settings.value("dial_max").toInt();
     ui->dial_max->setValue(mx);
@@ -245,7 +249,10 @@ void Settings::on_dial_min_sliderMoved(int position)
 void Settings::on_horizontalSlider_modifier_sliderMoved(int position)
 {
     // Max becomes default if the fraction to divide or multiply = 1
+    float mod = ((float)(position) )/ ( (float)(100));
+
     if(position == 0) {
+        mod = 0.01;
         ui->lineEdit_modifier->setText("0.01");
     }
     else if(position >= 99) {
@@ -257,8 +264,16 @@ void Settings::on_horizontalSlider_modifier_sliderMoved(int position)
         ui->lineEdit_min->setEnabled(true);
     }
 
-    float mod = ((float)(position) )/ ( (float)(100));
-
     ui->lineEdit_modifier->setText(QString::number(mod));
 
+}
+
+void Settings::on_timeEdit_editingFinished()
+{
+    QTime temp = ui->timeEdit->time();
+    if(temp.hour() == 0 && temp.minute()==0 && temp.second()<10)
+    {
+        temp.setHMS(0,0,10,0); //minimum time of 10 seconds
+        ui->timeEdit->setTime(temp);
+    }
 }
