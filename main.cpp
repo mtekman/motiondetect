@@ -1,17 +1,17 @@
 #include "mainwindow.h"
 #include <QtGui/QApplication>
-
+#include "QDebugStream.h"
 
 int main(int argc, char *argv[])
 {
-    // -q --quiet --size 320 240 -s 160 140 -m 4 --mask 3 -r 30 2 --range 4 1 --email tetris11@gmail.com "howdy" "Doody" true -e blank@grog.com "Truly" "motion" false -d /home/user --directory /home/ -m 0.9 --modifier 0.1 -w 60 --whitepix 80 --convert
-
     QApplication app(argc, argv);
+    QStringList arguments = QApplication::arguments();
+
+    QDebugStream(std::cout, "/home/user/MyDocs/DCIM/MISC/log.txt");
 
     //Enables passing Images as signals
     qRegisterMetaType<FCam::Image>("FCam::Image");
 
-    QStringList arguments = QApplication::arguments();
 
     MainWindow *mw; bool show = true;
 
@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
         mw->setOrientation(MainWindow::ScreenOrientationLockLandscape);
         mw->showExpanded();
     }
+
 
 
     return app.exec();
