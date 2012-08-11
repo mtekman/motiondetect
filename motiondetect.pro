@@ -33,7 +33,8 @@ HEADERS += mainwindow.h \
     emailthread.h \
     operations.h \
     CImg.h \
-    commandline.h
+    commandline.h \
+    QDebugStream.h
 FORMS += mainwindow.ui \
     noticebox.ui \
     settings.ui
