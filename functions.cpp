@@ -82,11 +82,3 @@ bool lensClosed() {
     fclose(ff);
     return state == 'c';
 }
-
-
-//Kernel-power 51 doesnt work. 50 is supposed to compatible -- untested.
-bool validKernel(){
-    QString command = "uname -r";
-    command = terminalAction(command, true);
-    return command.contains("omap1") || !command.contains("51");
-}
