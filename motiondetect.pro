@@ -27,16 +27,19 @@ SOURCES += main.cpp mainwindow.cpp \
     emailthread.cpp \
     operations.cpp \
     functions.cpp \
-    commandline.cpp
+    commandline.cpp \
+    timelapsewindow.cpp
 HEADERS += mainwindow.h \
     settings.h \
     emailthread.h \
     operations.h \
     CImg.h \
-    commandline.h
+    commandline.h \
+    timelapsewindow.h
 FORMS += mainwindow.ui \
     noticebox.ui \
-    settings.ui
+    settings.ui \
+    timelapsewindow.ui
 
 # Please do not modify the following two lines. Required for deployment.
 include(deployment.pri)
@@ -51,3 +54,8 @@ OTHER_FILES += \
     qtc_packaging/debian_fremantle/changelog
 
 LIBS += -lpthread -ljpeg -L../.. -lFCam
+
+maemo5 {
+    QT += maemo5
+    LIBS += -lalarm
+}
