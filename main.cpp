@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "timelapsewindow.h"
 #include <QtGui/QApplication>
 
 int main(int argc, char *argv[])
@@ -28,6 +29,10 @@ int main(int argc, char *argv[])
         mw->setOrientation(MainWindow::ScreenOrientationLockLandscape);
         mw->showExpanded();
     }
+
+    /* //TimeLapse Window
+    TimeLapseWindow tlw;
+    tlw.showMaximized();*/
 
     return app.exec();
 }
