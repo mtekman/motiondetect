@@ -27,33 +27,52 @@ int image_count = 0;
 QString save_dir;
 
 void Operations::run(){
-    cout<< "Range=(" << interval_min << "," << interval_max << ") Mod="<< interval_mod<< ", White="<< limitVal
-        << ", Size=("<< width <<","<< height << "),  Mask=" << erodeVar <<", Convert="<< convert_images <<", Delete="<< delete_images
-        << "\nDir=" << image_dir.toUtf8().data() << " Email:" << emailAlert << " " << email_address.toUtf8().data() << " "
-        << email_message.toUtf8().data() << " " << email_subject.toUtf8().data() << " "<< email_attach
-        << "\nCurrent Datetime : " << QDateTime::currentDateTime().toString().toUtf8().data()
-        << "\nDateTime Variable: " << time.toString().toUtf8().data() << endl;
+    //DEBUG
+    /*cout<< "Range=(" << interval_min << "," << interval_max << "),Mod="<< interval_mod<< ",White="<< limitVal
+        << ",Size=("<< width <<","<< height << "),Mask=" << erodeVar <<",Convert="<< convert_images <<",Delete="<< delete_images
+        << "\nDir=" << image_dir.toUtf8().data() << "\nEmail:" << emailAlert << " " << email_address.toUtf8().data() << " "
+        << email_message.toUtf8().data() << " " << email_subject.toUtf8().data() << " "<< email_attach << endl;*/
 
-    cout << "CameraThread: Started" << endl;
+    //Print Difference between dates
+    cout << cyan_col << "Current Date Time:\t" << QDateTime::currentDateTime().toString().toUtf8().data()
+         << "\nRecord Until Time:\t" << time.toString().toUtf8().data() << stop_col << endl;
+
+    cout << "CameraThread: "<< yellow_col << "Started" << stop_col << endl;
 
     if(lensClosed()) {
         willStop = true;
         alert("Make sure lens cap is open");
     }
     else{
-        initial();
-        save_dir = image_dir;
-        updateReferenceImage(10);
-        QThread::sleep(2);
-        cout << "\rGot static" << endl;
-        checkMovement(interval_max*1000, interval_min*1000,interval_mod, limitVal);
-        finishAndClose();
+        //TimeLapse
+        if(timelapse)
+        {
+            if(time.secsTo(QDateTime::currentDateTime())<0)
+            {
+                takeSingleWellExposedPhoto();
+            }
+            else {
+                if(convert_images) convertMovie(delete_images);
+            }
+        }
+        else  //Regular Operations
+        {
+            if(echo_to_log) echoLog("\n# Recording from "+QDate::currentDate().toString().toStdString()+" #\n");
+            initial();
+            save_dir = image_dir;
+            updateReferenceImage(10);
+            QThread::sleep(2);
+            checkMovement(interval_max*1000, interval_min*1000,interval_mod, limitVal);
+            finishAndClose();
+        }
     }
+
+    cout << "CameraThread: " << yellow_col << "Exited" << stop_col << endl;
 
 }
 
-
-Operations::Operations(){
+Operations::Operations(bool timelap){
+    timelapse = timelap;
     initial();
 }
 
@@ -76,19 +95,27 @@ void Operations::initial(){
 void Operations::finishAndClose(){
     // Order the sensor to stop the pipeline and discard any frames still in it.
     sensor1.stop();
-    cout << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
-    cout << "\nFinal color temperature: " << frame1.whiteBalance() << "K" << endl;
+    /*    cout << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
+      cout << "\nFinal color temperature: " << frame1.whiteBalance() << "K" << endl;*/
     // Check that the pipeline is empty
     assert(sensor1.framesPending() == 0);
     assert(sensor1.shotsPending() == 0);
-
     //If stop signal given, thread terminates here.
     if(!willStop)
-    {
-        //Convert images to movie, bool = delete images
+    {   //Convert images to movie, bool = delete images
         if(convert_images) convertToMP4(save_dir,delete_images);
     }
-    cout << "Camera Thread exited\n" << endl;
+}
+
+//Repeats...
+Operations::~Operations(){
+    // Order the sensor to stop the pipeline and discard any frames still in it.
+    sensor1.stop();
+        cout << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
+      cout << "\nFinal color temperature: " << frame1.whiteBalance() << "K" << endl;
+    // Check that the pipeline is empty
+    assert(sensor1.framesPending() == 0);
+    assert(sensor1.shotsPending() == 0);
 }
 
 
@@ -196,9 +223,6 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
     cout << "White Pixel Threshold is " << limit << endl;
 
     do{
-        cout << "secs to: " << QDateTime::currentDateTime().secsTo(time) << endl;
-
-
         //1. Grab a valid frame
         frame1 = sensor1.getFrame();
         assert(frame1.shot().id == stream1.id);
@@ -225,22 +249,38 @@ void Operations::checkMovement(int max, int min, float mod, int limit)
         int totalE = 0; cimg_forXYZC(sub,x,y,z,c) if(sub(x,y,z,c) > 0) totalE++;
         cout << totalE;
 
-        cout << "  Interval:" << current_interval << endl;
+        cout << "  Interval:" << current_interval;
+        cout << ", Seconds Left: " << QDateTime::currentDateTime().secsTo(time) << endl;
+
 
         //6. Check for movement -- if so: get new reference image
         if (totalE > limit)
         {
-            cout << "---Movement at time " << QTime::currentTime().toString().toUtf8().data() << endl;
-            record(10,20);             //record 10 images in quick succession.
+            std::string movement = "---Movement at time : " + QTime::currentTime().toString().toStdString();
+            cout << red_col << movement << stop_col << endl;
+
+            //7. Record logic:
+            float scale = ((float)(current_interval)/(float)(max));
+
+            int record_interval = (int)(scale*400)+100;  //max=500, min = 100
+            int record_frames = (int)(10- (scale*8)); //longest stint=10, shortest = 2;
+
+            record(record_frames,record_interval);
+
+            //8. Update reference
             updateReferenceImage();
             alert("Movement!", false);
 
-            //Send Email that logs movement
+            //Send Email &&|| Log that logs movement
             if(emailAlert){
                 em = new EmailThread(email_address,email_subject, email_message, email_attach, current_save_image);
             }
+            if(echo_to_log){
+                echoLog(movement+'\n');
+            }
 
-           // Move logic -- increase response per movement
+
+            // Move logic -- increase response per movement
             int new_int = (int)(current_interval*mod);
             current_interval = (new_int>min)?new_int:min;
 
@@ -291,4 +331,25 @@ void Operations::record(int frame_num, int interval)
 
     cout << "  done!" << endl;
 
+}
+
+//TimeLapse Operations
+void Operations::takeSingleWellExposedPhoto(){
+    defineGoodExposure(10);
+
+    frame1 = sensor1.getFrame();
+    assert(frame1.shot().id == stream1.id);
+
+    // to Filename
+    QString save_ = "/home/user/MyDocs/DCIM/MISC/timelapse_"+QString::number(QDateTime::currentDateTime().toTime_t())+".jpg";
+
+    const FCam::Image &image = frame1.image();
+    FCam::saveJPEG(image,save_.toStdString());
+    cout << "Got Photo" << endl;
+}
+
+void Operations::convertMovie(bool delet){
+    QString dir = "/home/user/MyDocs/DCIM/MISC/";
+    convertToMP4(dir, delet,
+                 "timelapse__"+QString::number(QDateTime::currentDateTime().toTime_t()) );
 }

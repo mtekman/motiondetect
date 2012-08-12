@@ -28,6 +28,8 @@ MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
         readLastWorkingSettings();
         on_mask_slide_sliderMoved(ui->mask_slide->value());
 
+        op->echo_to_log = false;
+
         width = op->width;
         ui->pushButton_stop->hide();
         ui->label_mask_hint->hide();
@@ -36,10 +38,14 @@ MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
     else{ //Perform commandLineOps
         connect(op,SIGNAL(finished()), this, SLOT(closeAndExit()));
 
+        op->timelapse = commands->timelapse;
+
         op->limitVal = commands->white;
         op->interval_max = commands->max;
         op->interval_min = commands->min;
         op->interval_mod = commands->mod;
+
+        op->echo_to_log = commands->log;
 
         op->emailAlert = commands->email;
         op->email_message = commands->message;
@@ -62,6 +68,7 @@ MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
 
         op->initial();
         op->start();
+
     }
 }
 
@@ -73,6 +80,7 @@ MainWindow::~MainWindow()
 void MainWindow::closeAndExit(){
     this->close();
     delete ui;
+    exit(1);
 }
 
 void MainWindow::setOrientation(ScreenOrientation orientation)

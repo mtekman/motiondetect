@@ -1,10 +1,17 @@
-
+#include <QProcess>
 #include "CImg.h"
 #include <FCam/FCam.h>
-#include <QProcess>
 #include <iostream>
+#include <string.h>
+
 
 using namespace cimg_library;
+
+char red_col[] = "\033[0;31m\033[1m";
+char cyan_col[] = "\033[0;36m";
+char yellow_col[] = "\033[0;33m";
+char green_col[] = "\033[0;32m";
+char stop_col[] = "\033[0m";
 
 //Shared QProcess
 QProcess *qp;
@@ -42,7 +49,7 @@ QString terminalAction(QString command, bool getoutput=false, bool show_output=f
 
 //replace with phone function in main app
 void alert(QString text, bool echo=true){
-    if (echo) std::cout << text.toUtf8().data() << std::endl;
+    if (echo) std::cout << red_col << text.toUtf8().data() << stop_col << std::endl;
     QString notif = QString("dbus-send --type=method_call --dest=org.freedesktop.Notifications /org/freedesktop/Notifications org.freedesktop.Notifications.SystemNoteInfoprint string:%1"+text+"%1").arg(QChar(0x22));
     terminalAction(notif);
 }
@@ -78,7 +85,13 @@ void convertToMP4(QString &dir, bool clear, QString videoname="movement")
 //Taken from FCamera
 bool lensClosed() {
     FILE * ff = fopen("/sys/devices/platform/gpio-switch/cam_shutter/state", "r");
-    char state = fgetc(ff);   // file contains either "open" or "closed"
+    char state = fgetc(ff);
     fclose(ff);
-    return state == 'c';
+    return state == 'c'; //o = open, c = close
+}
+
+void echoLog(std::string text){
+    FILE *ff = fopen("/home/user/.config/motion_detect.log", "a+");
+    fprintf(ff, text.c_str());
+    fclose(ff);
 }

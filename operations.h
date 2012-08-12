@@ -19,6 +19,8 @@ public:
     int limitVal;
     int erodeVar;
 
+    bool echo_to_log;
+
     bool emailAlert;
     QString email_message;
     QString email_address;
@@ -28,15 +30,21 @@ public:
     bool convert_images;
     bool delete_images;
 
+    bool timelapse;
+
     QString image_dir;
 
     QDateTime time;
 
 
-    Operations();
+    Operations(bool timelap = false);
+    ~Operations();
     void finishAndClose();
-    //No destructor
     void initial();
+
+    //TimeLapse commands
+    void takeSingleWellExposedPhoto();
+    void convertMovie(bool delet);
 
 
 public slots:
@@ -60,12 +68,9 @@ private:
     FCam::Frame frame1;              //Frame
 
     void errorCheck();
-    void defineGoodExposure(int stableframenum = 10); //50ms
-    //For Debugging:
     void updateReferenceImage(int frames=4);
-
     void checkMovement(int max=2000, int min=1000, float mod=0.8, int limit=200);
-
-    void record(int frame_num, int interval=0);
+    void record(int frame_num, int interval_secs=0);
+    void defineGoodExposure(int stableframenum = 10);
 };
 #endif // OPERATIONS_H

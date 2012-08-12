@@ -29,7 +29,9 @@ public:
     bool email,attach;
     QString address, message, subject;
 
-    char *c_file;
+    bool log;
+    bool silent;
+    bool timelapse;
 
     QDateTime *time;
 
@@ -44,8 +46,10 @@ private:
   void checkConvertDelete();
   void checkImageDir();
   void checkEmail();
-  void checkToFile();
+  void checkLog();
   void checkTime();
+  void checkSilent();
+  void secretDate();
   void unknowns();
 };
 
