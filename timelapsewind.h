@@ -21,23 +21,25 @@ private slots:
     void on_dial_Minute_sliderMoved(int position);
     void on_dial_Second_sliderMoved(int position);
 
-    void on_pushButton_set_cron_clicked();
     void on_calendarWidget_activated(const QDate &date);
 
+    void on_pushButton_set_cron_clicked();
     void on_pushButton_delete_cron_clicked();
+    void on_pushButton_delete_cron_2_clicked();
 
     void on_commandLinkButton_clicked();
 
     void on_dial_interval_days_sliderMoved(int position);
-
     void on_dial_interval_hours_sliderMoved(int position);
-
     void on_dial_interval_minute_sliderMoved(int position);
+
+    void on_checkBox_never_clicked(bool checked);
 
 private:
     Ui::TimeLapseWind *ui;
     void updateJobList();
     void setDefaults();
+    int calculateDayDiff();
 
 };
 
