@@ -24,8 +24,7 @@ int main(int argc, char *argv[])
         if(cmd->silent) close(STDOUT_FILENO);
         //
         new MotionWindow(0,cmd); //Starts quiet
-        //
-        delete cmd;
+        //cmd is deleted by MotionWindow
     }
 
     return app.exec();
