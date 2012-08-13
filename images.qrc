@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>images/timelapse.png</file>
+        <file>images/watchdog.png</file>
+        <file>images/connection.png</file>
+    </qresource>
+</RCC>
