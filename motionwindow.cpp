@@ -69,6 +69,8 @@ MotionWindow::MotionWindow(QWidget *parent, CommandLine *commands)
         op->initial();
         op->start();
 
+        delete commands;
+
     }
 }
 
