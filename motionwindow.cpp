@@ -11,8 +11,6 @@ MotionWindow::MotionWindow(QWidget *parent, CommandLine *commands)
 {
 #ifdef Q_WS_MAEMO_5
     this->setAttribute(Qt::WA_Maemo5StackedWindow);
-//    this->setWindowFlags(Qt::Window);
-//    this->setAttribute(Qt::WA_DeleteOnClose);
 #endif
     ui->setupUi(this);
 
@@ -77,6 +75,7 @@ MotionWindow::MotionWindow(QWidget *parent, CommandLine *commands)
 MotionWindow::~MotionWindow()
 {
     std::cout << "MotionWindow Deleted" << std::endl;
+    if(0!=set) delete set; //Remove dangling pointers
     delete ui;
 }
 
