@@ -42,7 +42,9 @@ CommandLine::CommandLine(QStringList &arguments){
     unknowns(); //Halt here for unknown variables
 
 }
-CommandLine::~CommandLine(){}
+CommandLine::~CommandLine(){
+    std::cout << "CommandLine Destroyed " << std::endl;
+}
 
 //Reusing variables is bad, but fun.
 void CommandLine::secretDate(){  // --teenage-diplomacy <DateTime> <Convert> <Delete>
