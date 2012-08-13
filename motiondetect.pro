@@ -22,24 +22,36 @@ symbian:TARGET.CAPABILITY += NetworkServices
 # CONFIG += mobility
 # MOBILITY +=
 
-SOURCES += main.cpp mainwindow.cpp \
+SOURCES += main.cpp \
     settings.cpp \
     emailthread.cpp \
     operations.cpp \
     functions.cpp \
     commandline.cpp \
-    timelapsewindow.cpp
-HEADERS += mainwindow.h \
+    timelapsewind.cpp \
+    alarmd_ops.cpp \
+    chooseop.cpp \
+    motionwindow.cpp
+#    motionwind.cpp \
+
+HEADERS += \
     settings.h \
     emailthread.h \
     operations.h \
     CImg.h \
     commandline.h \
-    timelapsewindow.h
-FORMS += mainwindow.ui \
-    noticebox.ui \
+    timelapsewind.h \
+    chooseop.h \
+    motionwindow.h
+#    motionwind.h \
+
+FORMS += \
     settings.ui \
-    timelapsewindow.ui
+    timelapsewind.ui \
+    chooseop.ui \
+    motionwindow.ui
+ #   motionwind.ui \
+
 
 # Please do not modify the following two lines. Required for deployment.
 include(deployment.pri)
@@ -53,9 +65,11 @@ OTHER_FILES += \
     qtc_packaging/debian_fremantle/compat \
     qtc_packaging/debian_fremantle/changelog
 
-LIBS += -lpthread -ljpeg -L../.. -lFCam
+LIBS += -lpthread -ljpeg -L../.. -lFCam -lalarm
 
-maemo5 {
+RESOURCES += \
+    images.qrc
+
+maemo5 { #Stacked Window
     QT += maemo5
-    LIBS += -lalarm
 }

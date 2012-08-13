@@ -1,5 +1,6 @@
-#include "mainwindow.h"
-#include "timelapsewindow.h"
+#include "chooseop.h"
+#include "motionwindow.h"
+#include "timelapsewind.h"
 #include <QtGui/QApplication>
 
 int main(int argc, char *argv[])
@@ -10,29 +11,22 @@ int main(int argc, char *argv[])
     //Enables passing Images as signals
     qRegisterMetaType<FCam::Image>("FCam::Image");
 
-    MainWindow *mw; bool show = true;
+    int length = arguments.length();
 
-    if(arguments.length()!=1) //1 is app name
+    //ChooseOp window is launched by default
+    if(length==1){ //1 is app name
+        chooseop *cp = new chooseop;
+        cp->showMaximized();
+    }
+    else if(length>1)  //Otherwise commandline ops are performed.
     {
         CommandLine *cmd = new CommandLine(arguments);
-        mw = new MainWindow(cmd);
-        show = false;
-        //
         if(cmd->silent) close(STDOUT_FILENO);
+        //
+        new MotionWindow(0,cmd); //Starts quiet
+        //
         delete cmd;
     }
-    else{
-        mw = new MainWindow;
-    }
-
-    if(show){
-        mw->setOrientation(MainWindow::ScreenOrientationLockLandscape);
-        mw->showExpanded();
-    }
-
-    /* //TimeLapse Window
-    TimeLapseWindow tlw;
-    tlw.showMaximized();*/
 
     return app.exec();
 }
