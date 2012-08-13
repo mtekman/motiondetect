@@ -5,6 +5,7 @@
 #define APPID "timelapse"
 
 QStringList cookie_info;
+int num_jobs = 0;
 
 // Very useful guide here:
 //http://wiki.maemo.org/Documentation/Maemo_5_Developer_Guide/Using_Generic_Platform_Components/Alarm_Framework#Adding_Alarm_Event_to_Queue
@@ -15,20 +16,20 @@ bool deleteAlarmd(cookie_t cookie)
     return alarmd_event_del(cookie) != -1;
 }
 
-void fetchMultipleJobs(){
+int fetchMultipleJobs(){
     cookie_t *list = 0;
     cookie_t cookie = 0;
     alarm_event_t *eve = 0;
 
     cookie_info.clear();
+    int i=0;
 
     if( (list = alarmd_event_query(0,0, 0,0, APPID)) == 0 )
     {
         std::cout << "Could not fetch" << std::endl;
         goto cleanup;
     }
-
-    for( int i = 0; (cookie = list[i]) != 0; ++i )
+    for(i = 0; (cookie = list[i]) != 0; ++i )
     {
         alarm_event_delete(eve); //clear current details
         if( (eve = alarmd_event_get(cookie)) == 0 )
@@ -38,14 +39,14 @@ void fetchMultipleJobs(){
         }
         //Add results to lists;
         cookie_info.append(QString::number( (long)(cookie) )+'\t'+  QString(ctime(&eve->trigger)));
-    }
+    } num_jobs = i;
 
 cleanup:
     free(list);
     alarm_event_delete(eve);
 }
 
-cookie_t addAlarmdJob(std::string text, uint secs){
+cookie_t addAlarmdJob(char * text, uint secs){
     cookie_t cookie = 0;
     alarm_event_t *eve = 0;
     alarm_action_t *act = 0;
@@ -64,13 +65,7 @@ cookie_t addAlarmdJob(std::string text, uint secs){
     act->flags |= ALARM_ACTION_WHEN_TRIGGERED;
     act->flags |= ALARM_ACTION_TYPE_EXEC;
 
-    std::string mesg = "phone-control --notify "+text;
-
-    char * writable = new char[mesg.size() + 1];
-    std::copy(mesg.begin(), mesg.end(), writable);
-    writable[mesg.size()] = '\0';
-
-    act->exec_command = writable;
+    act->exec_command = text;
 
     /* Send the alarm to alarmd */
     cookie = alarmd_event_add(eve);
