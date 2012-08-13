@@ -12,6 +12,7 @@ chooseop::chooseop(QWidget *parent) :
     this->setWindowFlags(Qt::Window);
 #endif
     ui->setupUi(this);
+
     //Null pointers
     mw =0; tlw =0;
 }
