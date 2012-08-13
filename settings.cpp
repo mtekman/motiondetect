@@ -12,16 +12,15 @@ Settings::Settings(QWidget *parent) :
 #ifdef Q_WS_MAEMO_5
     this->setAttribute(Qt::WA_Maemo5StackedWindow);
     this->setWindowFlags(Qt::Window);
-//    this->setAttribute(Qt::WA_DeleteOnClose);
 #endif
     ui->setupUi(this);
     readSettings();
-//    on_pushButton_reset_clicked();
     saved = false;
 }
 
 Settings::~Settings()
 {
+    std::cout << "Settings Deleted" << std::endl;
     delete ui;
 }
 
