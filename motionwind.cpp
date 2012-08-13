@@ -1,13 +1,13 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "motionwind.h"
+#include "ui_motionwind.h"
 
 #include <QtCore/QCoreApplication>
 #include <QCloseEvent>
 
 int image_label_height = 100;
 
-MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow)
+MotionWind::MotionWind(CommandLine *commands, QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MotionWind)
 {
 #ifdef Q_WS_MAEMO_5
     this->setAttribute(Qt::WA_Maemo5StackedWindow);
@@ -72,18 +72,18 @@ MainWindow::MainWindow(CommandLine *commands, QWidget *parent)
     }
 }
 
-MainWindow::~MainWindow()
+MotionWind::~MotionWind()
 {
     delete ui;
 }
 
-void MainWindow::closeAndExit(){
+void MotionWind::closeAndExit(){
     this->close();
     delete ui;
     exit(1);
 }
 
-void MainWindow::setOrientation(ScreenOrientation orientation)
+void MotionWind::setOrientation(ScreenOrientation orientation)
 {
 #if defined(Q_OS_SYMBIAN)
     // If the version of Qt on the device is < 4.7.2, that attribute won't work
@@ -126,7 +126,7 @@ void MainWindow::setOrientation(ScreenOrientation orientation)
     setAttribute(attribute, true);
 }
 
-void MainWindow::showExpanded()
+void MotionWind::showExpanded()
 {
 #if defined(Q_OS_SYMBIAN) || defined(Q_WS_SIMULATOR)
     showFullScreen();
@@ -137,7 +137,7 @@ void MainWindow::showExpanded()
 #endif
 }
 
-void MainWindow::on_pushButton_clicked()
+void MotionWind::on_pushButton_clicked()
 {
     readLastWorkingSettings();
     show_widgets(false);
@@ -145,7 +145,7 @@ void MainWindow::on_pushButton_clicked()
     op->start();
 }
 
-void MainWindow::on_mask_slide_sliderMoved(int position)
+void MotionWind::on_mask_slide_sliderMoved(int position)
 {
     ui->label_mask_hint->show();
 
@@ -179,7 +179,7 @@ void MainWindow::on_mask_slide_sliderMoved(int position)
     ui->label_mask_hint->move(coords);
 }
 
-void MainWindow::on_pushButton_settings_clicked()
+void MotionWind::on_pushButton_settings_clicked()
 {
     set = new Settings(this);
     set->exec();
@@ -189,14 +189,14 @@ void MainWindow::on_pushButton_settings_clicked()
     size = set->size;
 }
 
-void MainWindow::on_pushButton_stop_clicked()
+void MotionWind::on_pushButton_stop_clicked()
 {
     op->stop();
     restoreInterface();
 }
 
 
-void MainWindow::show_widgets(bool show)
+void MotionWind::show_widgets(bool show)
 {
     if(!show)
     {
@@ -221,7 +221,7 @@ void MainWindow::show_widgets(bool show)
 }
 
 //Read and write last saved values
-void MainWindow::writeSettings(bool new_ones){
+void MotionWind::writeSettings(bool new_ones){
     if(!new_ones)
     {
         QSettings settings("fcam");
@@ -268,7 +268,7 @@ void MainWindow::writeSettings(bool new_ones){
 }
 
 
-void MainWindow::readLastWorkingSettings()
+void MotionWind::readLastWorkingSettings()
 {
     QSettings settings("fcam");
     settings.beginGroup("main");
@@ -318,11 +318,11 @@ void MainWindow::readLastWorkingSettings()
 
 }
 
-void MainWindow::restoreInterface(){
+void MotionWind::restoreInterface(){
     show_widgets(true);
 }
 
-void MainWindow::newImage(const FCam::Image &image){
+void MotionWind::newImage(const FCam::Image &image){
     //cout << "Got image" << endl;
     QImage thumbQ(image(0,0), image.width()/2, image.height()/2, image.bytesPerRow()*2, QImage::Format_RGB32);
 
@@ -330,7 +330,7 @@ void MainWindow::newImage(const FCam::Image &image){
     ui->imageLab->setPixmap(qp.scaledToHeight(image_label_height) );
 }
 
-void MainWindow::on_checkBox_show_image_clicked(bool checked)
+void MotionWind::on_checkBox_show_image_clicked(bool checked)
 {
     if(checked) {
         connect(op, SIGNAL(newImage(const FCam::Image &)), this, SLOT(newImage(const FCam::Image &) ) );
@@ -342,7 +342,7 @@ void MainWindow::on_checkBox_show_image_clicked(bool checked)
     }
 }
 
-void MainWindow::closeEvent(QCloseEvent *event){
+void MotionWind::closeEvent(QCloseEvent *event){
     event->ignore();
     op->stop();
 

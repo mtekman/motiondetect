@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MOTIONWIND_H
+#define MOTIONWIND_H
 
 #include <QtGui/QMainWindow>
 #include <QSettings>
@@ -9,10 +9,10 @@
 #include "commandline.h"
 
 namespace Ui {
-class MainWindow;
+class MotionWind;
 }
 
-class MainWindow : public QMainWindow
+class MotionWind : public QMainWindow
 {
     Q_OBJECT
 public:
@@ -29,8 +29,8 @@ public:
     };
 
     //commands needs to be a pointer, since cannot initialise references
-    explicit MainWindow(CommandLine *commands = 0,QWidget *parent = 0);
-    virtual ~MainWindow();
+    explicit MotionWind(CommandLine *commands = 0,QWidget *parent = 0);
+    virtual ~MotionWind();
 
     // Note that this will only have an effect on Symbian and Fremantle.
     void setOrientation(ScreenOrientation orientation);
@@ -59,11 +59,11 @@ private slots:
     void on_checkBox_show_image_clicked(bool checked);
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MotionWind *ui;
     void readLastWorkingSettings();
     void writeSettings(bool new_ones=false);
     void closeEvent(QCloseEvent *event);
 
 };
 
-#endif // MAINWINDOW_H
+#endif // MOTIONWIND_H
