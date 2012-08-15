@@ -28,7 +28,7 @@ void convertImage(const FCam::Image &image,CImg<unsigned char> &img)
     }
 }
 
-QString terminalAction(QString command, bool getoutput=false, bool show_output=false)
+QString terminalAction(QString command, bool getoutput=false)
 {
     //TODO: Show output
 
@@ -63,16 +63,19 @@ void clearImages(QString &dir)
 }
 
 
-void convertToMP4(QString &dir, bool clear, QString videoname="movement")
+void convertToMP4(QString &dir, bool clear, QString videoname="movement", int fps=25)
 {
     alert("Converting to MP4 -- please wait");
 
     if(!dir.endsWith('/'))  dir.append('/');
     if(!videoname.endsWith(".mpg")) videoname.append(".mpg");
+    bool timelapse = videoname.contains("timelapse");
 
     std::cout << "Converting " << dir.toUtf8().data() << "*.jpg to " << (dir+videoname).toUtf8().data() << std::endl;
+    if(timelapse) std::cout << "Timelapse" << std::endl;
 
-    QString convert = "ffmpeg -i "+dir+"%05d.jpg -y "+dir+videoname; //y forces overwrite
+    QString fileformat = (!timelapse)?"motiondetect-%05d.jpg":"timelapse-%06d.jpg";
+    QString convert = "ffmpeg -i "+dir+fileformat+" -y "+dir+videoname+" -r "+QString::number(fps); //y forces overwrite, r must come at end to specify OUTPUT framerate
     terminalAction(convert, true);
 
     std::cout << "Finished converting." << std::endl;
@@ -94,4 +97,17 @@ void echoLog(std::string text){
     FILE *ff = fopen("/home/user/.config/motion_detect.log", "a+");
     fprintf(ff, text.c_str());
     fclose(ff);
+}
+
+void killAllOccurencesOfApp(){
+    QStringList pids = terminalAction("ps aux | grep teenage\\-dipl | awk '{print $1}'", true).split('\n');
+    QString kill = "echo 'kill ";
+    for (char i=0; i< pids.length(); i++)
+    {
+        kill.append(pids.at(i)+" ");
+    }
+    kill.append("' | root");
+    std::cout << "Command: " << kill.toUtf8().data() << std::endl;
+
+    terminalAction(kill);
 }
