@@ -66,7 +66,7 @@ cookie_t addAlarmdJob(QString command, uint secs){
 
     QString action = "/bin/ash -c '"+command+"'";
 
-    std::cout << "ACTIONNY! " << action.toUtf8().data() << std::endl;
+//    std::cout << "ACTIONNY! " << action.toUtf8().data() << std::endl;
     alarm_action_set_exec_command(act, action.toUtf8().data());
 
     /* Send the alarm to alarmd */
@@ -76,6 +76,3 @@ cookie_t addAlarmdJob(QString command, uint secs){
     //alarm_event_delete(eve); //<-- Invalid pointer exception
     return cookie;
 }
-//Few more tests on alarmd needed. Then check what the issue with the deleting is.
-
-
