@@ -32,8 +32,12 @@ private slots:
     void on_dial_interval_days_sliderMoved(int position);
     void on_dial_interval_hours_sliderMoved(int position);
     void on_dial_interval_minute_sliderMoved(int position);
+    void on_dial_interval_second_sliderMoved(int position);
 
     void on_checkBox_never_clicked(bool checked);
+
+    void on_dial_size_sliderMoved(int position);
+    void on_dial_fps_sliderMoved(int position);
 
 private:
     Ui::TimeLapseWind *ui;
