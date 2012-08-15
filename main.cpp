@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
         //cmd is deleted by MotionWindow
     }
 
+    //chooseop and MotionWindow are auto-deleted on app exit
     return app.exec();
 }
 
