@@ -3,5 +3,9 @@
         <file>images/timelapse.png</file>
         <file>images/watchdog.png</file>
         <file>images/connection.png</file>
+        <file>images/camera.png</file>
+        <file>images/settings.png</file>
+        <file>images/stop.png</file>
+        <file>images/dog.gif</file>
     </qresource>
 </RCC>
