@@ -46,7 +46,7 @@ cleanup:
     alarm_event_delete(eve);
 }
 
-cookie_t addAlarmdJob(char * text, uint secs){
+cookie_t addAlarmdJob(QString command, uint secs){
     cookie_t cookie = 0;
     alarm_event_t *eve = 0;
     alarm_action_t *act = 0;
@@ -62,10 +62,12 @@ cookie_t addAlarmdJob(char * text, uint secs){
 
     /* Add command*/
     act = alarm_event_add_actions(eve,1);
-    act->flags |= ALARM_ACTION_WHEN_TRIGGERED;
-    act->flags |= ALARM_ACTION_TYPE_EXEC;
+    act->flags |= (ALARM_ACTION_WHEN_TRIGGERED | ALARM_ACTION_TYPE_EXEC);
 
-    act->exec_command = text;
+    QString action = "/bin/ash -c '"+command+"'";
+
+    std::cout << "ACTIONNY! " << action.toUtf8().data() << std::endl;
+    alarm_action_set_exec_command(act, action.toUtf8().data());
 
     /* Send the alarm to alarmd */
     cookie = alarmd_event_add(eve);
@@ -74,4 +76,6 @@ cookie_t addAlarmdJob(char * text, uint secs){
     //alarm_event_delete(eve); //<-- Invalid pointer exception
     return cookie;
 }
+//Few more tests on alarmd needed. Then check what the issue with the deleting is.
+
 
