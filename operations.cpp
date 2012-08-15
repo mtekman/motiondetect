@@ -6,6 +6,8 @@
 #include <assert.h>
 #include <vector>
 #include <string.h>
+#include <QDir>
+
 
 #include <FCam/Image.h>
 #include <QPicture>
@@ -28,10 +30,10 @@ QString save_dir;
 
 void Operations::run(){
     //DEBUG
-    /*cout<< "Range=(" << interval_min << "," << interval_max << "),Mod="<< interval_mod<< ",White="<< limitVal
+    cout<< yellow_col << "Range=(" << interval_min << "," << interval_max << "),Mod="<< interval_mod<< ",White="<< limitVal
         << ",Size=("<< width <<","<< height << "),Mask=" << erodeVar <<",Convert="<< convert_images <<",Delete="<< delete_images
         << "\nDir=" << image_dir.toUtf8().data() << "\nEmail:" << emailAlert << " " << email_address.toUtf8().data() << " "
-        << email_message.toUtf8().data() << " " << email_subject.toUtf8().data() << " "<< email_attach << endl;*/
+        << email_message.toUtf8().data() << " " << email_subject.toUtf8().data() << " "<< email_attach << stop_col << endl;
 
     //Print Difference between dates
     cout << cyan_col << "Current Date Time:\t" << QDateTime::currentDateTime().toString().toUtf8().data()
@@ -111,8 +113,8 @@ void Operations::finishAndClose(){
 Operations::~Operations(){
     // Order the sensor to stop the pipeline and discard any frames still in it.
     sensor1.stop();
-        cout << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
-      cout << "\nFinal color temperature: " << frame1.whiteBalance() << "K" << endl;
+    cout << "Final exposure: " << (frame1.exposure()/1000.f) << "f ms. Final gain: " << frame1.gain();
+    cout << "\nFinal color temperature: " << frame1.whiteBalance() << "K" << endl;
     // Check that the pipeline is empty
     assert(sensor1.framesPending() == 0);
     assert(sensor1.shotsPending() == 0);
@@ -316,7 +318,7 @@ void Operations::record(int frame_num, int interval)
         //int to string converison
         QString num = QString("%1").arg(image_count, 5, 10, QChar('0'));   //00001.jpg, 00002.jpg, etc.
         // to Filename
-        current_save_image = save_dir+num+".jpg";
+        current_save_image = save_dir+"motiondetect-"+num+".jpg";
         string file = current_save_image.toUtf8().constData();
 
         cout << "\rRecording :" << count << " " << file << flush;
@@ -335,21 +337,42 @@ void Operations::record(int frame_num, int interval)
 
 //TimeLapse Operations
 void Operations::takeSingleWellExposedPhoto(){
+    //File Operations
+    QDir dir("/home/user/MyDocs/DCIM/MISC/");
+    const QStringList qs("timelapse-*.jpg");
+
+    QStringList files = dir.entryList(qs);
+    QString new_save; int num=1;
+
+    if(files.length()>0){
+        QString last = files.last();
+        cout << green_col << "Last file:\t" << dir.absolutePath().toUtf8().data() << '/' << last.toUtf8().data() << endl;
+        num = last.split("timelapse-").at(1).split(".jpg").at(0).toInt()+1; //gets just the number part
+    }
+    new_save = "timelapse-"+QString::number(num).rightJustified(6,'0')+".jpg";
+
+    QString save_ = dir.absolutePath()+'/'+new_save;
+    cout << "New file:\t" << save_.toUtf8().data() << stop_col << endl;
+    cout << "Size:\t(" << width << "," << height << ")\t" << endl;
+
+    //Camera ops
     defineGoodExposure(10);
 
     frame1 = sensor1.getFrame();
     assert(frame1.shot().id == stream1.id);
 
-    // to Filename
-    QString save_ = "/home/user/MyDocs/DCIM/MISC/timelapse_"+QString::number(QDateTime::currentDateTime().toTime_t())+".jpg";
-
     const FCam::Image &image = frame1.image();
     FCam::saveJPEG(image,save_.toStdString());
-    cout << "Got Photo" << endl;
+    alert("Got Photo");
 }
 
 void Operations::convertMovie(bool delet){
     QString dir = "/home/user/MyDocs/DCIM/MISC/";
     convertToMP4(dir, delet,
-                 "timelapse__"+QString::number(QDateTime::currentDateTime().toTime_t()) );
+                 "timelapse-"+QString::number(QDateTime::currentDateTime().toTime_t()),
+                 erodeVar);
+}
+//static
+void Operations::deathToAlarmdJobs(){
+    killAllOccurencesOfApp();
 }

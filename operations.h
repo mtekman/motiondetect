@@ -45,6 +45,7 @@ public:
     //TimeLapse commands
     void takeSingleWellExposedPhoto();
     void convertMovie(bool delet);
+    static void deathToAlarmdJobs();
 
 
 public slots:
