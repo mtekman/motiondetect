@@ -1,4 +1,14 @@
-motiondetect (0.0.1) unstable; urgency=low
+watchdog (0.0.3) unstable; urgency=low
+  * <Add change description here>
+
+ -- unknown <>  Tue, 14 Aug 2012 17:11:58 +0100
+
+watchdog (0.0.2) unstable; urgency=low
+  * <Add change description here>
+
+ -- unknown <>  Tue, 14 Aug 2012 17:11:57 +0100
+
+watchdog (0.0.1) unstable; urgency=low
 
   * Initial Release.
 
