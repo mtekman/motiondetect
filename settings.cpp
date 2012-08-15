@@ -33,7 +33,7 @@ void Settings::closeEvent(QCloseEvent *event){
 
 void Settings::on_dial_whitepixel_sliderMoved(int position)
 {
-    ui->lineEdit_whitepixel->setText(QString::number(position*2));
+    ui->lineEdit_whitepixel->setText(QString::number(position*5));
 }
 
 void Settings::on_pushButton_reset_clicked()
@@ -43,8 +43,8 @@ void Settings::on_pushButton_reset_clicked()
     on_dial_whitepixel_sliderMoved(40);
     //ui->lineEdit_whitepixel->setText("60");
 
-    ui->dial_max->setValue(40);
-    on_dial_max_sliderMoved(40);
+    ui->dial_max->setValue(65);
+    on_dial_max_sliderMoved(65); // 10 seconds
     //ui->lineEdit_max->setText("2");
 
     ui->dial_min->setValue(10);
