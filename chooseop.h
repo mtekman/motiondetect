@@ -24,6 +24,8 @@ private slots:
 
     void on_button_choose_timelapse_clicked();
 
+    void on_actionAbout_triggered();
+
 private:
     MotionWindow *mw;
     TimeLapseWind *tlw;
