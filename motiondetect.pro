@@ -31,8 +31,8 @@ SOURCES += main.cpp \
     timelapsewind.cpp \
     alarmd_ops.cpp \
     chooseop.cpp \
-    motionwindow.cpp
-#    motionwind.cpp \
+    motionwindow.cpp \
+    about.cpp
 
 HEADERS += \
     settings.h \
@@ -42,16 +42,15 @@ HEADERS += \
     commandline.h \
     timelapsewind.h \
     chooseop.h \
-    motionwindow.h
-#    motionwind.h \
+    motionwindow.h \
+    about.h
 
 FORMS += \
     settings.ui \
     timelapsewind.ui \
     chooseop.ui \
-    motionwindow.ui
- #   motionwind.ui \
-
+    motionwindow.ui \
+    about.ui
 
 # Please do not modify the following two lines. Required for deployment.
 include(deployment.pri)
