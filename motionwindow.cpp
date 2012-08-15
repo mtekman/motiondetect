@@ -18,7 +18,6 @@ MotionWindow::MotionWindow(QWidget *parent, CommandLine *commands)
     op = new Operations;
     set = 0; //null pointer for settings
 
-    //this should be in if statement
     if(commands == 0){ //Not assigned
         //For repeated use with newImage Slot
         image_label_height = ui->imageLab->height();
@@ -26,8 +25,8 @@ MotionWindow::MotionWindow(QWidget *parent, CommandLine *commands)
         connect(op, SIGNAL(finished()), this, SLOT(restoreInterface()));  //returns interfacr to normal on close
 
         readLastWorkingSettings();
-        on_mask_slide_sliderMoved(ui->mask_slide->value());
-
+//        on_mask_slide_sliderMoved(ui->mask_slide->value());
+        op->timelapse = false;
         op->echo_to_log = false;
 
         width = op->width;
@@ -236,8 +235,6 @@ void MotionWindow::writeSettings(bool new_ones){
         QSettings settings("fcam");
         settings.beginGroup("main");
 
-        settings.setValue("mask_slider", ui->mask_slide->value());
-
         settings.endGroup();
     }
     else if(new_ones)
@@ -252,7 +249,6 @@ void MotionWindow::writeSettings(bool new_ones){
         settings.setValue("width", 320);
         settings.setValue("height", 240);
 
-        settings.setValue("mask_slider", 5);
         settings.setValue("interval_max", 10);
         settings.setValue("interval_min", 1);
         settings.setValue("interval_modifier",0.16);
@@ -288,11 +284,7 @@ void MotionWindow::readLastWorkingSettings()
         QSettings settings("fcam");
         settings.beginGroup("main");
 
-        int slide = settings.value("mask_slider").toInt();
         size = settings.value("size_label").toString();
-
-        ui->mask_slide->setValue(slide);
-        on_mask_slide_sliderMoved(slide);
 
         QTime tim = settings.value("time").toTime();
         op->time = QDateTime(QDateTime::currentDateTime().addSecs( (60*60*tim.hour())+(60*tim.minute())+tim.second() ) );

@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Motion Detector</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="images.qrc">
+    <normaloff>:/img/images/camera.png</normaloff>:/img/images/camera.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLabel" name="imageLab">
@@ -57,8 +61,8 @@
         </font>
        </property>
        <property name="text">
-        <string>Mask
-Size</string>
+        <string>  Mask 
+  Size </string>
        </property>
       </widget>
      </item>
@@ -119,7 +123,18 @@ Size</string>
      <item row="0" column="5">
       <widget class="QPushButton" name="pushButton_settings">
        <property name="text">
-        <string>Advanced Settings</string>
+        <string>Advanced
+Settings</string>
+       </property>
+       <property name="icon">
+        <iconset resource="images.qrc">
+         <normaloff>:/img/images/settings.png</normaloff>:/img/images/settings.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -133,6 +148,16 @@ Size</string>
        </property>
        <property name="text">
         <string>Stop</string>
+       </property>
+       <property name="icon">
+        <iconset resource="images.qrc">
+         <normaloff>:/img/images/stop.png</normaloff>:/img/images/stop.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>32</width>
+         <height>32</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -206,6 +231,16 @@ Size</string>
        <property name="text">
         <string>Start</string>
        </property>
+       <property name="icon">
+        <iconset resource="images.qrc">
+         <normaloff>:/img/images/camera.png</normaloff>:/img/images/camera.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>64</width>
+         <height>64</height>
+        </size>
+       </property>
       </widget>
      </item>
     </layout>
@@ -235,6 +270,8 @@ Size</string>
    </widget>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="images.qrc"/>
+ </resources>
  <connections/>
 </ui>
