@@ -1,7 +1,7 @@
 Source: watchdog
 Section: user/hidden
 Priority: optional
-Maintainer: Mehmet Tekman <tetris11@gmx.com>
+Maintainer: tetris11 <tetris11@gmx.com>
 Build-Depends: debhelper (>= 5), libqt4-dev
 Standards-Version: 3.7.3
 Homepage: <insert the upstream URL, if relevant>
